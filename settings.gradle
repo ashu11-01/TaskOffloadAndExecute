@@ -1,0 +1,2 @@
+rootProject.name='Nearby File Transfer'
+include ':app'

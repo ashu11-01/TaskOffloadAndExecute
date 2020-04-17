@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Nearby File Transfer</string>
+    <string name="role_executer">Executer</string>
+    <string name="role_offloader">Offloader</string>
+    <string name="choose_role">Choose Your Role</string>
+    <string name="codename">Codename: </string>
+    <string name="status">Status: </string>
+    <string name="start_advertise">Start Advertising</string>
+    <string name="stop_advertise">Stop Advertising</string>
+    <string name="Details">Detalis</string>
+    <string name="conn_details">Connection Details: </string>
+    <string name="op_details">Operation Details: </string>
+    <string name="task_details">Task Details: </string>
+    <string name="rec_off">Recieved from Offloader</string>
+    <string name="res_exec">Result after Executing Task</string>
+    <string name="execute">Execute Task</string>
+    <string name="send_to_off">Return Result</string>
+    <string name="start_discovery">Start Discovering</string>
+    <string name="stop_discovery">Stop Dicovering</string>
+    <string name="proceed">Proceed</string>
+    <string name="task_data">Task Data</string>
+    <string name="result_from_executer">Result from Executer</string>
+    <string name="size">size (Bytes)</string>
+    <string name="operation">Operation</string>
+    <string name="op_compress">Compress this Image</string>
+    <string name="op_greyscale">Greyscale this Image</string>
+    <string name="error_missing_permissions">Essential Permission Denied</string>
+</resources>

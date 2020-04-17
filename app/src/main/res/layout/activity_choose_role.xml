@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#D3D3D3"
+    tools:context=".ChooseRoleActivity">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="50dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_marginVertical="100dp"
+        android:background="@drawable/rounded_edge_white"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="parent">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/choose_role"
+            android:textColor="@color/colorPrimaryDark"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:contentDescription="@string/choose_role"
+            android:layout_marginBottom="20dp"/>
+
+
+        <ImageView
+            android:id="@+id/img_Executer"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:contentDescription="@string/role_executer"
+            android:onClick="onClick"
+            android:src="@drawable/executer_img" />
+            <TextView
+                android:layout_marginVertical="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:onClick="onClick"
+                android:id="@+id/tv_exec"
+                android:text="@string/role_executer"/>
+
+        <ImageView
+            android:id="@+id/img_Offloader"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:contentDescription="@string/role_offloader"
+            android:onClick="onClick"
+            android:src="@drawable/offloader_img" />
+
+        <TextView
+            android:layout_marginVertical="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:onClick="onClick"
+            android:id="@+id/tv_off"
+            android:text="@string/role_offloader"/>
+    </LinearLayout>
+</LinearLayout>
