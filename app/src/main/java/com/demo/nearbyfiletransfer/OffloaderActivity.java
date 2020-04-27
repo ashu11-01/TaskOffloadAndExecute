@@ -1,10 +1,14 @@
 package com.demo.nearbyfiletransfer;
 
 import android.animation.Animator;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,6 +25,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.demo.nearbyfiletransfer.MenuManager.PreferencesMenuManager;
+import com.demo.nearbyfiletransfer.MenuManager.ServiceRequestManager;
 import com.demo.nearbyfiletransfer.Utility.Constants;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
@@ -141,6 +147,10 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
                     return;
                 }
                 endpointDiscoveryCallback = new OffloaderEndpointDiscoveryCallback();
+
+                SharedPreferences preferences = getSharedPreferences("WeightPreference",MODE_PRIVATE);
+                float v = preferences.getFloat(Constants.SharedPreferenceKeys.RATING_WEIGHT,0.5f);
+                Toast.makeText(this,String.valueOf(v),Toast.LENGTH_SHORT).show();
                 client.startDiscovery(SERVICE_ID,endpointDiscoveryCallback,options).
                         addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
@@ -180,6 +190,31 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
 //                selectFile();
                 break;
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.preferences_menu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        boolean result=false;
+        switch (item.getItemId()){
+            case R.id.weights:
+                PreferencesMenuManager manager = new PreferencesMenuManager(OffloaderActivity.this);
+                manager.setPreferenceWeights();
+                result= true;
+            case R.id.service_type:
+                ServiceRequestManager.setServiceRequest(getApplicationContext());
+                result= true;
+            default:
+                result =super.onOptionsItemSelected(item);
+        }
+        return result;
     }
 
     private void stopDiscovery(){

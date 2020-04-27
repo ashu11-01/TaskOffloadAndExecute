@@ -1,7 +1,5 @@
 package com.demo.nearbyfiletransfer.Utility;
 
-import java.util.HashMap;
-import java.util.Map;
 public class Constants {
 
     public static class ConnectionStatus{
@@ -24,5 +22,11 @@ public class Constants {
             return result;
         }
 
+    }
+
+    public static class SharedPreferenceKeys{
+        public static final String SYSTEM_WEIGHT="SystemWeight";
+        public static final String RATING_WEIGHT="RatingWeight";
+        public static final String SERVICE_REQUEST="ServiceRequest";
     }
 }
