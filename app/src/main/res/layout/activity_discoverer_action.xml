@@ -2,19 +2,17 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="@drawable/rounded_edge_white"
         android:padding="5dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/tv_off_con"
@@ -38,103 +36,76 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_off_con" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rec_connected"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+        <Button
+            android:id="@+id/btn_code"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="15dp"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_off_con" />
+            android:onClick="onClick"
+            android:text="@string/browse"
+            app:layout_constraintStart_toEndOf="@+id/tv_code_file"
+            app:layout_constraintTop_toBottomOf="@+id/sp_choose_exec_" />
+
+        <Button
+            android:id="@+id/btn_input"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="15dp"
+            android:onClick="onClick"
+            android:text="@string/browse"
+            app:layout_constraintStart_toEndOf="@+id/tv_input_file"
+            app:layout_constraintTop_toBottomOf="@+id/sp_extension" />
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/tv_input_file"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="25dp"
             android:text="@string/task_data"
-            app:layout_constraintEnd_toStartOf="@+id/divider2"
-            app:layout_constraintHorizontal_bias="0.52"
+            android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline7" />
+            app:layout_constraintTop_toBottomOf="@+id/sp_extension" />
 
-        <ImageView
-            android:id="@+id/iv_off_task_data"
-            android:layout_width="120dp"
+        <EditText
+            android:id="@+id/et_result"
+            android:layout_width="match_parent"
             android:layout_height="120dp"
-            android:layout_marginTop="40dp"
-            android:contentDescription="@string/task_data"
-            android:onClick="onClick"
-            android:scaleType="centerCrop"
-            app:layout_constraintEnd_toStartOf="@+id/divider2"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView2"
-            app:srcCompat="@drawable/send_back_to_offloader" />
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
+            android:clickable="false"
+            android:ems="10"
+            android:gravity="start|top"
+            android:inputType="textMultiLine"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView3"
+            tools:layout_editor_absoluteX="5dp" />
 
-        <View
-            android:id="@+id/divider2"
-            android:layout_width="8dp"
-            android:layout_height="0dp"
-            android:background="?android:attr/listDivider"
-            app:layout_constraintBottom_toBottomOf="@id/guideline6"
-            app:layout_constraintEnd_toEndOf="parent"
+        <TextView
+            android:id="@+id/tv_code_file"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:text="@string/code_file"
+            android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/guideline7" />
+            app:layout_constraintTop_toBottomOf="@+id/sp_choose_exec_" />
 
         <TextView
             android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:text="@string/result_from_executer"
+            android:textSize="20sp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.491"
-            app:layout_constraintStart_toEndOf="@+id/divider2"
-            app:layout_constraintTop_toTopOf="@+id/guideline7" />
-
-        <ImageView
-            android:id="@+id/iv_off_result"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:layout_marginTop="40dp"
-            android:contentDescription="@string/result_from_executer"
-            android:onClick="onClick"
-            android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/divider2"
-            app:layout_constraintTop_toBottomOf="@+id/textView3"
-            app:srcCompat="@drawable/recieved_from_offloader" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_begin="374dp" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline7"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_begin="149dp" />
-
-        <TextView
-            android:id="@+id/tv_off_task_size"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:text="@string/size"
-            app:layout_constraintStart_toEndOf="@+id/divider2"
-            app:layout_constraintTop_toBottomOf="@+id/iv_off_result" />
-
-        <TextView
-            android:id="@+id/tv_off_result_size"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:text="@string/size"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/iv_off_task_data" />
+            app:layout_constraintTop_toBottomOf="@+id/btn_offload" />
 
         <TextView
             android:id="@+id/tv_off_operation"
@@ -142,39 +113,31 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
-            android:text="@string/operation"
-            app:layout_constraintBottom_toTopOf="@+id/guideline7"
+            android:text="@string/file_extension"
+            android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/sp_choose_exec_" />
+            app:layout_constraintTop_toBottomOf="@+id/btn_code" />
 
         <Spinner
-            android:id="@+id/drop_down_operation"
+            android:id="@+id/sp_extension"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
-            app:layout_constraintBottom_toTopOf="@+id/guideline7"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.482"
-            app:layout_constraintStart_toEndOf="@+id/tv_off_operation"
-            app:layout_constraintTop_toBottomOf="@+id/sp_choose_exec_" />
+            app:layout_constraintStart_toStartOf="@+id/btn_code"
+            app:layout_constraintTop_toBottomOf="@+id/btn_code" />
 
         <Button
             android:id="@+id/btn_offload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginEnd="20dp"
             android:background="@drawable/rounded_edge_blue"
             android:onClick="onClick"
             android:text="Offload"
             android:textColor="#ffffff"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline6" />
+            app:layout_constraintTop_toBottomOf="@+id/btn_input" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

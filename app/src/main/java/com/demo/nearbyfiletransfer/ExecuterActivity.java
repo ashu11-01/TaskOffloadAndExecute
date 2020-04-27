@@ -1,51 +1,44 @@
  package com.demo.nearbyfiletransfer;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.collection.ArrayMap;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
+ import android.animation.Animator;
+ import android.content.DialogInterface;
+ import android.os.Build;
+ import android.os.Bundle;
+ import android.os.Environment;
+ import android.util.Log;
+ import android.view.View;
+ import android.widget.Button;
+ import android.widget.ImageView;
+ import android.widget.TextView;
+ import android.widget.Toast;
 
-import android.Manifest;
-import android.animation.Animator;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.ParcelFileDescriptor;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
+ import androidx.annotation.NonNull;
+ import androidx.annotation.RequiresApi;
+ import androidx.appcompat.app.AlertDialog;
+ import androidx.appcompat.app.AppCompatActivity;
+ import androidx.collection.ArrayMap;
 
-import com.bumptech.glide.Glide;
-import com.demo.nearbyfiletransfer.Operations.CompressImage;
-import com.demo.nearbyfiletransfer.Utility.Constants;
-import com.google.android.gms.nearby.Nearby;
-import com.google.android.gms.nearby.connection.AdvertisingOptions;
-import com.google.android.gms.nearby.connection.ConnectionInfo;
-import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
-import com.google.android.gms.nearby.connection.ConnectionResolution;
-import com.google.android.gms.nearby.connection.ConnectionsClient;
-import com.google.android.gms.nearby.connection.Payload;
-import com.google.android.gms.nearby.connection.PayloadCallback;
-import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
-import com.google.android.gms.nearby.connection.Strategy;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+ import com.demo.nearbyfiletransfer.BrokerUtility.AdvertiserRating;
+ import com.demo.nearbyfiletransfer.Logger.InstantSystemParameters;
+ import com.demo.nearbyfiletransfer.Operations.CompressImage;
+ import com.demo.nearbyfiletransfer.Utility.Constants;
+ import com.google.android.gms.nearby.Nearby;
+ import com.google.android.gms.nearby.connection.AdvertisingOptions;
+ import com.google.android.gms.nearby.connection.ConnectionInfo;
+ import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
+ import com.google.android.gms.nearby.connection.ConnectionResolution;
+ import com.google.android.gms.nearby.connection.ConnectionsClient;
+ import com.google.android.gms.nearby.connection.Payload;
+ import com.google.android.gms.nearby.connection.PayloadCallback;
+ import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
+ import com.google.android.gms.nearby.connection.Strategy;
+ import com.google.android.gms.tasks.OnFailureListener;
+ import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Map;
+ import java.io.File;
+ import java.io.FileNotFoundException;
+ import java.nio.charset.StandardCharsets;
+ import java.util.Map;
 
  public class ExecuterActivity extends AppCompatActivity {
     private static final String TAG = "ExecuterActivity";
@@ -121,6 +114,23 @@ import java.util.Map;
         };
     }
 
+     private String getAdvertisingMessage(){
+         StringBuilder message = new StringBuilder();
+         String sep ="/";
+         message.append(codename);   message.append(sep);
+         message.append(AdvertiserRating.getRating()); message.append(sep);
+         message.append("Python Script Execution"); message.append(sep);
+         InstantSystemParameters instantSystemParameters = new InstantSystemParameters(getApplicationContext());
+         Map<String,String> parameters = instantSystemParameters.getInstantParameters();
+         message.append(parameters.get("Timestamp")); message.append(sep);
+         message.append(parameters.get("Battery")); message.append(sep);
+         message.append(parameters.get("RAM")); message.append(sep);
+         message.append(parameters.get("CPUFrequency")); message.append(sep);
+         message.append(parameters.get("Storage"));  message.append(sep);
+         Log.d(TAG,"get msg: "+parameters.toString()+"\n"+message);
+         return new String(message);
+     }
+
      @RequiresApi(api = Build.VERSION_CODES.M)
      private void initViews() {
          executeractionPanel = findViewById(R.id.executeraction);
@@ -155,10 +165,10 @@ import java.util.Map;
                     Toast.makeText(ExecuterActivity.this,"Already Advertising",Toast.LENGTH_SHORT).show();
                     return;
                 }
-                client.startAdvertising(codename,getApplicationContext().getPackageName(), connectionLifecycleCallback,options).addOnSuccessListener(new OnSuccessListener<Void>() {
+                client.startAdvertising(getAdvertisingMessage(),getApplicationContext().getPackageName(), connectionLifecycleCallback,options).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(ExecuterActivity.this,"Advertising",Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(ExecuterActivity.this,"Advertising",Toast.LENGTH_SHORT).show();
                         isAdvertising = true;
                         setStatusText("Advertising");
                     }

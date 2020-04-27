@@ -18,11 +18,15 @@
     <string name="start_discovery">Start Discovering</string>
     <string name="stop_discovery">Stop Dicovering</string>
     <string name="proceed">Proceed</string>
-    <string name="task_data">Task Data</string>
+    <string name="task_data">Choose input file: </string>
     <string name="result_from_executer">Result from Executer</string>
     <string name="size">size (Bytes)</string>
     <string name="operation">Operation</string>
     <string name="op_compress">Compress this Image</string>
     <string name="op_greyscale">Greyscale this Image</string>
     <string name="error_missing_permissions">Essential Permission Denied</string>
+    <string name="file_extension">File extension</string>
+    <string name="code_file">Choose code file: </string>
+    <string name="browse">Browse</string>
+    <string name="list_executers">List of Nearby Executers</string>
 </resources>

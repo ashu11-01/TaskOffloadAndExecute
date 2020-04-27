@@ -34,6 +34,13 @@
         <activity android:name=".MainActivity">
 
         </activity>
+        <receiver android:name=".Logger.LogWorker">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+                <action android:name="android.intent.action.BATTERY_CHANGED"/>
+            </intent-filter>
+        </receiver>
         <provider
             android:authorities="com.demo.nearbyfiletransfer.fileprovider "
             android:name="androidx.core.content.FileProvider"

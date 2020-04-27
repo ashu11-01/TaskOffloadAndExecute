@@ -1,26 +1,19 @@
 package com.demo.nearbyfiletransfer;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import androidx.annotation.NonNull;
 
-public class ExecuterModel implements Parcelable {
+public class ExecuterModel  {
 
     private String codename;
     private String rating;
-    private String endpointId;
     private int status;
-
-    //required empty constructor
-    public ExecuterModel() {}
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
+    private String serviceType;
+    private String timestamp;
+    private String battery;
+    private String RAM;
+    private String Cpu;
+    private String storage;
+    private String endpointId;
 
     public String getEndpointId() {
         return endpointId;
@@ -30,19 +23,16 @@ public class ExecuterModel implements Parcelable {
         this.endpointId = endpointId;
     }
 
-    public String getRating() {
-        return rating;
-    }
-
-    public void setRating(String rating) {
-        this.rating = rating;
-    }
-
-    public ExecuterModel(String codename, String rating, String endpointId,int status) {
+    public ExecuterModel() {}
+    public ExecuterModel(String codename, String rating, String serviceType, String timestamp, String battery, String RAM, String cpu, String storage) {
         this.codename = codename;
         this.rating = rating;
-        this.endpointId = endpointId;
-        this.status = status;
+        this.serviceType = serviceType;
+        this.timestamp = timestamp;
+        this.battery = battery;
+        this.RAM = RAM;
+        Cpu = cpu;
+        this.storage = storage;
     }
 
     public String getCodename() {
@@ -53,42 +43,74 @@ public class ExecuterModel implements Parcelable {
         this.codename = codename;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public String getRating() {
+        return rating;
     }
 
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(codename);
-        parcel.writeString(endpointId);
-        parcel.writeString(rating);
-        parcel.writeInt(status);
+    public void setRating(String rating) {
+        this.rating = rating;
     }
 
-    public ExecuterModel(Parcel in){
-        codename = in.readString();
-        endpointId = in.readString();
-        rating = in.readString();
-        status = in.readInt();
+    public int getStatus() {
+        return status;
     }
 
-    public static final Parcelable.Creator<ExecuterModel> CREATOR = new Creator<ExecuterModel>() {
-        @Override
-        public ExecuterModel createFromParcel(Parcel parcel) {
-            return new ExecuterModel(parcel);
-        }
+    public void setStatus(int status) {
+        this.status = status;
+    }
 
-        @Override
-        public ExecuterModel[] newArray(int i) {
-            return new ExecuterModel[i];
-        }
-    };
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getBattery() {
+        return battery;
+    }
+
+    public void setBattery(String battery) {
+        this.battery = battery;
+    }
+
+    public String getRAM() {
+        return RAM;
+    }
+
+    public void setRAM(String RAM) {
+        this.RAM = RAM;
+    }
+
+    public String getCpu() {
+        return Cpu;
+    }
+
+    public void setCpu(String cpu) {
+        Cpu = cpu;
+    }
+
+    public String getStorage() {
+        return storage;
+    }
+
+    public void setStorage(String storage) {
+        this.storage = storage;
+    }
 
     @NonNull
     @Override
     public String toString() {
-         super.toString();
-         return this.getCodename();
+        super.toString();
+        return this.codename;
     }
 }

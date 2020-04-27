@@ -40,8 +40,14 @@ public class ExecutersListAdapter extends RecyclerView.Adapter<ExecutersListAdap
         holder.itemView.setTag(executerList.get(position));
 
         holder.tvIndex.setText(position+1+"");
-        holder.tvName.setText(executerList.get(position).getCodename());
-        holder.tvRating.setText(executerList.get(position).getRating());
+        ExecuterModel executer = executerList.get(position);
+        holder.tvName.setText(executer.getCodename());
+        holder.tvRating.setText(executer.getRating());
+        holder.tvBattery.setText(executer.getBattery()+" %");
+        holder.tvRam.setText(executer.getRAM()+" %");
+        holder.tvCpu.setText(executer.getCpu()+" MHz");
+        holder.tvStorage.setText(executer.getStorage()+" KB");
+        holder.tvService.setText(executer.getServiceType());
         switch (executerList.get(position).getStatus()){
             case Constants.ConnectionStatus.NEUTRAL:
                 holder.ivConnStatus.setImageDrawable(context.getDrawable(R.drawable.neutral_conn_status));
@@ -72,7 +78,7 @@ public class ExecutersListAdapter extends RecyclerView.Adapter<ExecutersListAdap
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
-        TextView tvIndex, tvName, tvRating,tvConnStatus;
+        TextView tvIndex, tvName, tvRating,tvConnStatus,tvBattery,tvRam,tvCpu,tvStorage,tvService;
         ImageView ivConnStatus;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -81,6 +87,11 @@ public class ExecutersListAdapter extends RecyclerView.Adapter<ExecutersListAdap
             tvRating = itemView.findViewById(R.id.tv_discovered_item_rating1);
             ivConnStatus = itemView.findViewById(R.id.iv_off_conn_status);
             tvConnStatus = itemView.findViewById(R.id.tv_conn_status);
+            tvBattery = itemView.findViewById(R.id.tv_battery);
+            tvRam = itemView.findViewById(R.id.tv_ram);
+            tvCpu = itemView.findViewById(R.id.tv_cpu);
+            tvStorage = itemView.findViewById(R.id.tv_storage);
+            tvService = itemView.findViewById(R.id.tv_service_avl);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

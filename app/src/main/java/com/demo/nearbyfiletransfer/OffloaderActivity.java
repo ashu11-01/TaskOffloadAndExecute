@@ -1,21 +1,8 @@
 package com.demo.nearbyfiletransfer;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.FileProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.animation.Animator;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
@@ -27,7 +14,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.demo.nearbyfiletransfer.Utility.Constants;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
@@ -41,23 +34,19 @@ import com.google.android.gms.nearby.connection.Payload;
 import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.Strategy;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class OffloaderActivity extends AppCompatActivity implements ExecutersListAdapter.ItemClicked {
     private static final String TAG = "OffloaderActivity";
-    //discoveryPanel
+
+    //discoveryPanel views
     TextView tvCodename,tvStatus;
     Button btnStartDiscover,btnStopDiscover,btnProceed;
     View offloadAction;
@@ -65,20 +54,25 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
     RecyclerView recyclerExecutersList;
     RecyclerView.Adapter executersListAdapter;
     RecyclerView.LayoutManager layoutManager;
-    //offloaderActionPanel
+
+    //offloaderActionPanel views
     Spinner spExecuter,spOperation;
     ImageView ivSend,ivRecieved;
     Button btnOffload;
     List<ExecuterModel> connectedExecuters = new ArrayList<>();
     TextView tvSizeSend,tvSizeRecieved;
 
-    boolean isInAction=false, isNoExecuterSelected, isNoOperationSelected, isDiscovering,isSending=false;
-    String codename, SERVICE_ID, selectedOperation;
-    DiscoveryOptions options;
-    List<ExecuterModel> executerList = new ArrayList<>();
-    ExecuterModel  selectedExecuter;
-    private final int REQUEST_IMAGE_CHOOSE = 11;
-    Payload fileToSend,byteToSend;
+    boolean isInAction=false, isDiscovering, isSending=false;
+    String codename, SERVICE_ID;
+
+    DiscoveryOptions options;       //strategy
+
+    List<ExecuterModel> executerList = new ArrayList<>(); // list of nearby executers
+    ExecuterModel  selectedExecuter;        // executer selected to offload
+    private final int REQUEST_INPUT_CHOOSE = 11;    //request code for input file choose
+    private final int REQUEST_CODE_CHOOSE = 12;    // request code for code file choose
+    Payload fileToSend,byteToSend;                 // payload to send
+
     //Nearby client and callbacks
     ConnectionsClient client;
     EndpointDiscoveryCallback endpointDiscoveryCallback;
@@ -87,6 +81,8 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
     Map<Long,Payload> incomingPayloads = new ArrayMap<>();
     Map<Long,String> payloadFilenameMap = new ArrayMap<>();
     String filename;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -120,18 +116,14 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
     private void initActionViews(){
         //offloaderAction
         spExecuter = findViewById(R.id.sp_choose_exec_);
-        spOperation = findViewById(R.id.drop_down_operation);
+        spOperation = findViewById(R.id.sp_extension);
         btnOffload = findViewById(R.id.btn_offload);
-        ivSend = findViewById(R.id.iv_off_task_data);
-        ivRecieved = findViewById(R.id.iv_off_result);
-        tvSizeSend = findViewById(R.id.tv_off_task_size);
-        tvSizeRecieved = findViewById(R.id.tv_off_result_size);
-        List<String> operationList = new ArrayList<>();
-        operationList.add("Compress Image");
-        operationList.add("Grayscale Image");
-        ArrayAdapter<String> operationAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, operationList);
+        List<String> extensionList = new ArrayList<>();
+        extensionList.add("(.py) Python");
+        extensionList.add("(.cpp) C++");
+        ArrayAdapter<String> operationAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, extensionList);
         operationAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
-        OperationSelectedListener opListener = new OperationSelectedListener();
+        FileTypeSelectedListener opListener = new FileTypeSelectedListener();
         spOperation.setOnItemSelectedListener(opListener);
         spOperation.setAdapter(operationAdapter);
         ArrayAdapter<ExecuterModel> executerAdapter = new ArrayAdapter<>(this,R.layout.support_simple_spinner_dropdown_item,connectedExecuters);
@@ -180,8 +172,12 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
                 sendTaskData();
                 break;
 
-            case R.id.iv_off_task_data:
-                selectTaskData();
+            case R.id.btn_code:
+//                selectFile();
+                break;
+
+            case R.id.btn_input:
+//                selectFile();
                 break;
         }
     }
@@ -277,59 +273,20 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         return position;
     }
 
-    private void selectTaskData(){
-        Intent chooseImageFromGallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(chooseImageFromGallery,REQUEST_IMAGE_CHOOSE);
-    }
-
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_IMAGE_CHOOSE) {
-            if (resultCode == RESULT_OK) {
-                try{
-                    assert data != null;
-                    Uri uri = data.getData();
-                    Glide.with(OffloaderActivity.this).load(uri).into(ivSend);
-                    filename = uri.getLastPathSegment();
-                    assert uri != null;
-                    ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r");
-                    assert pfd != null;
-                    fileToSend = Payload.fromFile(pfd);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    Log.e(TAG,"FileNotFound:"+e.getMessage());
-                }
-                catch (NullPointerException e){
-                    e.printStackTrace();
-                    Log.e(TAG,"NullPointerException: "+e.getMessage());
-                }
-            }
-        }
-    }
-
-
 
     private void sendTaskData() {
-
-        String messageToSend = selectedOperation + ":" + fileToSend.getId() + ":" + filename + ".jpg";
-        byteToSend = Payload.fromBytes(messageToSend.getBytes(StandardCharsets.UTF_8));
-        client.sendPayload(selectedExecuter.getEndpointId(),byteToSend);
-
-       client.sendPayload(selectedExecuter.getEndpointId(),fileToSend);
-
     }
 
-    private class OperationSelectedListener implements AdapterView.OnItemSelectedListener{
-
+    private class FileTypeSelectedListener implements AdapterView.OnItemSelectedListener{
 
         @Override
         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-            selectedOperation = (String) adapterView.getItemAtPosition(i);
+
         }
 
         @Override
         public void onNothingSelected(AdapterView<?> adapterView) {
-            isNoOperationSelected = true;
+
         }
     }
 
@@ -344,7 +301,7 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
 
         @Override
         public void onNothingSelected(AdapterView<?> adapterView) {
-            isNoExecuterSelected = true;
+
         }
     }
 
@@ -352,7 +309,9 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         @Override
         public void onEndpointFound(String s, DiscoveredEndpointInfo discoveredEndpointInfo) {
             if(discoveredEndpointInfo.getServiceId().equals(SERVICE_ID)){
-                ExecuterModel executer = new ExecuterModel(discoveredEndpointInfo.getEndpointName(),"5",s, Constants.ConnectionStatus.NEUTRAL);
+
+                ExecuterModel executer = splitAndStoreAdvertisingMessage(discoveredEndpointInfo.getEndpointName());
+                executer.setEndpointId(s);
                 executerList.add(executer);
                 executersListAdapter.notifyItemInserted(executerList.indexOf(executer));
 
@@ -367,13 +326,20 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         }
     }
 
+    private ExecuterModel splitAndStoreAdvertisingMessage(String s) {
+        String parts[] = s.split("/");
+        Log.d(TAG,"split and store: "+parts[0]);
+        ExecuterModel executer = new ExecuterModel(parts[0],parts[1],parts[2],parts[3],parts[4],parts[5],parts[6],parts[7]);
+        return executer;
+    }
+
     private class OffloaderConnectionLifecycleCallback extends ConnectionLifecycleCallback{
         @Override
         public void onConnectionInitiated(String s, ConnectionInfo connectionInfo) {
             if(!connectionInfo.isIncomingConnection()){
                 AlertDialog.Builder showAuthToken = new AlertDialog.Builder(OffloaderActivity.this);
                 showAuthToken.setTitle("New Connection Initiated");
-                showAuthToken.setMessage("Executer Codename: "+connectionInfo.getEndpointName() +"\n"+"Authentication Token: "+connectionInfo.getAuthenticationToken());
+                showAuthToken.setMessage("Executer Codename: "+connectionInfo.getEndpointName().split("/")[0] +"\n"+"Authentication Token: "+connectionInfo.getAuthenticationToken());
                 showAuthToken.setCancelable(true);
                 showAuthToken.create();
                 showAuthToken.show();
