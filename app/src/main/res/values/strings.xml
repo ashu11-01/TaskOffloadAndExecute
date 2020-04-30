@@ -35,4 +35,6 @@
     <string name="percent">%</string>
     <string name="cpu_freq_unit">MHz</string>
     <string name="storage_unit">KB</string>
+    <string name="input_file_name">Input Filename</string>
+    <string name="code_file_name">Code Filename</string>
 </resources>

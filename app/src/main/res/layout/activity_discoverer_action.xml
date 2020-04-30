@@ -7,10 +7,11 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@drawable/rounded_edge_white"
         android:padding="5dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -47,6 +48,22 @@
             app:layout_constraintStart_toEndOf="@+id/tv_code_file"
             app:layout_constraintTop_toBottomOf="@+id/sp_choose_exec_" />
 
+        <TextView
+            android:id="@+id/tv_code_file_display"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:layout_constraintStart_toStartOf="@+id/sp_choose_exec_"
+            app:layout_constraintTop_toBottomOf="@+id/btn_code" />
+
+        <TextView
+            android:id="@+id/tv_input_file_display"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:layout_constraintStart_toStartOf="@+id/sp_choose_exec_"
+            app:layout_constraintTop_toBottomOf="@+id/btn_input" />
+
         <Button
             android:id="@+id/btn_input"
             android:layout_width="wrap_content"
@@ -56,18 +73,18 @@
             android:onClick="onClick"
             android:text="@string/browse"
             app:layout_constraintStart_toEndOf="@+id/tv_input_file"
-            app:layout_constraintTop_toBottomOf="@+id/sp_extension" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_code_file_display" />
 
         <TextView
             android:id="@+id/tv_input_file"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="25dp"
+            android:layout_marginTop="20dp"
             android:text="@string/task_data"
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/sp_extension" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_code_file_display" />
 
         <EditText
             android:id="@+id/et_result"
@@ -107,37 +124,39 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/btn_offload" />
 
+        <!--
         <TextView
             android:id="@+id/tv_off_operation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="15dp"
             android:text="@string/file_extension"
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_code" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_code_file_display" />
 
         <Spinner
             android:id="@+id/sp_extension"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="15dp"
             app:layout_constraintStart_toStartOf="@+id/btn_code"
-            app:layout_constraintTop_toBottomOf="@+id/btn_code" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_code_file_display" />
+            -->
 
         <Button
             android:id="@+id/btn_offload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
+            android:layout_marginTop="15dp"
             android:layout_marginEnd="20dp"
             android:background="@drawable/rounded_edge_blue"
             android:onClick="onClick"
             android:text="Offload"
             android:textColor="#ffffff"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_input" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_input_file_display" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,18 +1,22 @@
  package com.demo.nearbyfiletransfer;
 
  import android.animation.Animator;
+ import android.content.ClipData;
+ import android.content.ClipboardManager;
  import android.content.DialogInterface;
+ import android.content.Intent;
+ import android.net.Uri;
  import android.os.Build;
  import android.os.Bundle;
- import android.os.Environment;
+ import android.os.ParcelFileDescriptor;
  import android.util.Log;
  import android.view.View;
  import android.widget.Button;
- import android.widget.ImageView;
  import android.widget.TextView;
  import android.widget.Toast;
 
  import androidx.annotation.NonNull;
+ import androidx.annotation.Nullable;
  import androidx.annotation.RequiresApi;
  import androidx.appcompat.app.AlertDialog;
  import androidx.appcompat.app.AppCompatActivity;
@@ -20,8 +24,6 @@
 
  import com.demo.nearbyfiletransfer.BrokerUtility.AdvertiserRating;
  import com.demo.nearbyfiletransfer.Logger.InstantSystemParameters;
- import com.demo.nearbyfiletransfer.Operations.CompressImage;
- import com.demo.nearbyfiletransfer.Utility.Constants;
  import com.google.android.gms.nearby.Nearby;
  import com.google.android.gms.nearby.connection.AdvertisingOptions;
  import com.google.android.gms.nearby.connection.ConnectionInfo;
@@ -42,14 +44,14 @@
 
  public class ExecuterActivity extends AppCompatActivity {
     private static final String TAG = "ExecuterActivity";
-    TextView tvCodename,status;
+     private static final int REQUEST_RESULT_CHOOSE = 13 ;
+     TextView tvCodename,status;
     Button btnStartAdvertise, btnStopAdvertise;
 
     //executeraction panel
      View executeractionPanel;
     Button btnExecute,btnSendBack;
-    TextView tvOffloader,tvTask,tvOperation;
-    ImageView ivRecieve,ivSend;
+    TextView tvOffloader,tvCodeFile,tvInputFile;
     String codename;
      AdvertisingOptions options;
      //nearby client and callbacks
@@ -148,12 +150,10 @@
      }
 
      private void initExecuterActionViews(){
-
-         tvOffloader = findViewById(R.id.tv_exec_conn);
-         tvTask = findViewById(R.id.tv_exec_task);
-         tvOperation = findViewById(R.id.tv_exec_op);
-         ivSend = findViewById(R.id.iv_exec_send);
-         ivRecieve = findViewById(R.id.iv_exec_recieved);
+         tvCodeFile = findViewById(R.id.tv_code_filename2);
+         tvInputFile = findViewById(R.id.tv_input_filename2);
+         tvOffloader = findViewById(R.id.tv_offloader);
+         tvOffloader.setText(cnnectedOffloader.getCodename());
          btnExecute=findViewById(R.id.btn_execute);
          btnSendBack = findViewById(R.id.btn_send);
      }
@@ -165,7 +165,8 @@
                     Toast.makeText(ExecuterActivity.this,"Already Advertising",Toast.LENGTH_SHORT).show();
                     return;
                 }
-                client.startAdvertising(getAdvertisingMessage(),getApplicationContext().getPackageName(), connectionLifecycleCallback,options).addOnSuccessListener(new OnSuccessListener<Void>() {
+                client.startAdvertising(getAdvertisingMessage(),getApplicationContext().getPackageName(),
+                        connectionLifecycleCallback,options).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
 //                        Toast.makeText(ExecuterActivity.this,"Advertising",Toast.LENGTH_SHORT).show();
@@ -188,26 +189,43 @@
                 break;
 
             case R.id.btn_execute:
-                performOperation();
+                String command = "python source.py < input.txt > output.txt";
+                ClipboardManager manager =(ClipboardManager) getApplicationContext().getSystemService(CLIPBOARD_SERVICE);
+                ClipData clipData = ClipData.newPlainText("command",command);
+                manager.setPrimaryClip(clipData);
+                Toast.makeText(this,"Command copied. Open Termux and paste command to execute",Toast.LENGTH_SHORT).show();
                 break;
 
             case R.id.btn_send:
-                try{Payload send = Payload.fromFile(result);client.sendPayload(cnnectedOffloader.getEndpointId(),send);}
-                catch (FileNotFoundException e ) {e.printStackTrace();}
-
+                Intent filechooser = new Intent(Intent.ACTION_GET_CONTENT);
+                filechooser.setType("file/*");
+                startActivityForResult(filechooser,REQUEST_RESULT_CHOOSE);
                 break;
         }
      }
 
-     private void performOperation() {
-         if(opCode == Constants.OperationCodes.compressOpCode){
-             result = CompressImage.compress(this,recievedFile,40);
-             Toast.makeText(this,result.getName()+"",Toast.LENGTH_SHORT).show();
-             Log.d(TAG,"inside: "+opCode+" "+(result==null));
+     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+         super.onActivityResult(requestCode, resultCode, data);
+         switch (requestCode){
+             case REQUEST_RESULT_CHOOSE:
+                 if(resultCode==RESULT_OK && data!=null){
+                     try {
+                         Uri uri = data.getData();
+                         ParcelFileDescriptor pfd = this.getContentResolver().openFileDescriptor(uri,"r");
+                         Payload resultFile = Payload.fromFile(pfd);
+//                         String filename = uri.getPath().substring(uri.getPath().lastIndexOf("/")+1);
+                         String filename = uri.getLastPathSegment();
+                         String message = resultFile.getId() + ":" +filename;
+                         Payload bytes = Payload.fromBytes(message.getBytes(StandardCharsets.UTF_8));
+                         client.sendPayload(cnnectedOffloader.getEndpointId(),bytes);
+                         client.sendPayload(cnnectedOffloader.getEndpointId(),resultFile);
+                     } catch (FileNotFoundException e) {
+                         e.printStackTrace();
+                     }
+                 }
+                 break;
          }
-         Log.d(TAG,opCode+" "+(result==null));
      }
-
      private void stopAdvertise() {
          if(!isAdvertising){
              Toast.makeText(ExecuterActivity.this,"Not Advertising",Toast.LENGTH_LONG).show();
@@ -299,19 +317,22 @@
          switch (payload.getType()){
              case Payload.Type.BYTES:
                  String message= new String(payload.asBytes(),StandardCharsets.UTF_8);
-                 String[] parts = getFilenameAndOperation(message);
-                 tvOperation.setText(getString(R.string.operation)+parts[0]);
-                 opCode = Constants.OperationCodes.getOpCodeForOperation(parts[0]);
+                 String parts[] = message.split(":");
+                 payloadFilenameMap.put(Long.parseLong(parts[0]),parts[1]);
+
                  break;
 
              case Payload.Type.FILE:
                  try {
                      File file = payload.asFile().asJavaFile();
-                     File location = new File(getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"Nearby");
-//                   String name = new String(incomingPayloads.get(payload.getId()).asBytes(),StandardCharsets.UTF_8);
-                     String filename="rec.jpg";
+
+
+//                     String fileExtension = payloadFilenameMap.get(payload.getId()).split(".")[1];
+//                     String filename = "";
+//                     if(fileExtension.equals(".py"))    filename = "source.py";
+//                     else if (fileExtension.equals(".txt")) filename = "input.txt";
                      boolean is = file.renameTo(new File(file.getParentFile(),payloadFilenameMap.get(payload.getId())));
-                     recievedFile = file;
+                     setStatusText(++count +"file recieved: "+payloadFilenameMap.get(payload.getId()));
                      Log.d(TAG,"renamed: "+is);
                  }
                  catch (Exception e){
@@ -319,13 +340,5 @@
                  }
                  break;
          }
-     }
-     private String[] getFilenameAndOperation(String message){
-         String[] parts = message.split(":");
-
-         long payloadId = Long.parseLong(parts[1]);
-         String filename=parts[2];
-         payloadFilenameMap.put(payloadId,filename);
-         return parts;
      }
  }

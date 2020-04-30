@@ -54,9 +54,9 @@ public class PreferencesMenuManager {
     }
 
     private void showWeights(int value){
-        wSystem = value; wRating = 100-value;
-        tvSystemWeight.setText(String.valueOf(value));
-        tvRatingWeight.setText(String.valueOf(100-value));
+        wSystem = 100-value; wRating = value;
+        tvSystemWeight.setText(String.valueOf(wSystem));
+        tvRatingWeight.setText(String.valueOf(wRating));
     }
 
 

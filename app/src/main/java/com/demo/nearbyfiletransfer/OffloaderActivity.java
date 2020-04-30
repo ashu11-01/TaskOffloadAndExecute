@@ -1,9 +1,12 @@
 package com.demo.nearbyfiletransfer;
 
 import android.animation.Animator;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Menu;
@@ -13,12 +16,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -44,6 +47,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,11 +67,9 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
 
     //offloaderActionPanel views
     Spinner spExecuter,spOperation;
-    ImageView ivSend,ivRecieved;
     Button btnOffload;
     List<ExecuterModel> connectedExecuters = new ArrayList<>();
-    TextView tvSizeSend,tvSizeRecieved;
-
+    TextView codeFilename,inputFilename;
     boolean isInAction=false, isDiscovering, isSending=false;
     String codename, SERVICE_ID;
 
@@ -77,7 +79,7 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
     ExecuterModel  selectedExecuter;        // executer selected to offload
     private final int REQUEST_INPUT_CHOOSE = 11;    //request code for input file choose
     private final int REQUEST_CODE_CHOOSE = 12;    // request code for code file choose
-    Payload fileToSend,byteToSend;                 // payload to send
+    Payload codeFileToSend,inputFiletoSend,byteToSend;                 // payload to send
 
     //Nearby client and callbacks
     ConnectionsClient client;
@@ -86,7 +88,6 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
     OffloaderPayloadCallback payloadCallback;
     Map<Long,Payload> incomingPayloads = new ArrayMap<>();
     Map<Long,String> payloadFilenameMap = new ArrayMap<>();
-    String filename;
 
 
     @Override
@@ -121,17 +122,18 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
 
     private void initActionViews(){
         //offloaderAction
+        codeFilename=findViewById(R.id.tv_code_file_display);
+        inputFilename = findViewById(R.id.tv_input_file_display);
         spExecuter = findViewById(R.id.sp_choose_exec_);
-        spOperation = findViewById(R.id.sp_extension);
         btnOffload = findViewById(R.id.btn_offload);
-        List<String> extensionList = new ArrayList<>();
+       /* List<String> extensionList = new ArrayList<>();
         extensionList.add("(.py) Python");
         extensionList.add("(.cpp) C++");
         ArrayAdapter<String> operationAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, extensionList);
         operationAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         FileTypeSelectedListener opListener = new FileTypeSelectedListener();
         spOperation.setOnItemSelectedListener(opListener);
-        spOperation.setAdapter(operationAdapter);
+        spOperation.setAdapter(operationAdapter);*/
         ArrayAdapter<ExecuterModel> executerAdapter = new ArrayAdapter<>(this,R.layout.support_simple_spinner_dropdown_item,connectedExecuters);
         executerAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         ExecuterSelectedListener exListener = new ExecuterSelectedListener();
@@ -183,11 +185,50 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
                 break;
 
             case R.id.btn_code:
-//                selectFile();
+                selectFile(REQUEST_CODE_CHOOSE);
                 break;
 
             case R.id.btn_input:
-//                selectFile();
+                selectFile(REQUEST_INPUT_CHOOSE);
+                break;
+        }
+    }
+
+    private void selectFile(int requestCode) {
+        Intent filechooser = new Intent(Intent.ACTION_GET_CONTENT);
+        filechooser.setType("file/*");
+        startActivityForResult(filechooser,requestCode);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode){
+            case REQUEST_CODE_CHOOSE:
+                if(resultCode==RESULT_OK && data!=null){
+                    try {
+                        Uri uri = data.getData();
+                        ParcelFileDescriptor pfd = this.getContentResolver().openFileDescriptor(uri,"r");
+                        codeFileToSend = Payload.fromFile(pfd);
+                        String filename = uri.getPath().substring(uri.getPath().lastIndexOf("/")+1);
+                        codeFilename.setText(uri.getLastPathSegment());
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+            case REQUEST_INPUT_CHOOSE:
+                if(resultCode==RESULT_OK && data!=null){
+                    try {
+                        Uri uri = data.getData();
+                        ParcelFileDescriptor pfd = this.getContentResolver().openFileDescriptor(uri,"r");
+                        inputFiletoSend = Payload.fromFile(pfd);
+                        String filename = uri.getPath().substring(uri.getPath().lastIndexOf("/")+1);
+                        inputFilename.setText(filename);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
                 break;
         }
     }
@@ -310,6 +351,23 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
 
 
     private void sendTaskData() {
+
+        String codeFile = codeFilename.getText().toString();
+        long codePayloadId = codeFileToSend.getId();
+        String message = String.valueOf(codePayloadId) + ":" + codeFile;
+        byteToSend = Payload.fromBytes(message.getBytes(StandardCharsets.UTF_8));
+        isSending = true;
+
+        String inputFile = inputFilename.getText().toString();
+        long inputPayloadId = inputFiletoSend.getId();
+        message = String.valueOf(inputPayloadId) + ":" + inputFile;
+        Payload byteToSend2 = Payload.fromBytes(message.getBytes(StandardCharsets.UTF_8));
+
+        client.sendPayload(selectedExecuter.getEndpointId(),byteToSend);            //source code filename message payload
+        client.sendPayload(selectedExecuter.getEndpointId(),byteToSend2);           //input filename message payload
+        client.sendPayload(selectedExecuter.getEndpointId(),codeFileToSend);        //source code file payload
+        client.sendPayload(selectedExecuter.getEndpointId(),inputFiletoSend);       // inpute file payload
+        isSending = false;
     }
 
     private class FileTypeSelectedListener implements AdapterView.OnItemSelectedListener{
@@ -418,7 +476,7 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
                 if(incomingPayloads.containsKey(payloadTransferUpdate.getPayloadId()))             //update for incoming payload
                     processRecievedPayload(incomingPayloads.get(payloadTransferUpdate.getPayloadId()));
                 else           //update for outgoing payload
-                    Toast.makeText(OffloaderActivity.this,"File Sending complete",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OffloaderActivity.this,"sent successfully",Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -439,6 +497,7 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
 //                   String name = new String(incomingPayloads.get(payload.getId()).asBytes(),StandardCharsets.UTF_8);
                     String filename="rec.jpg";
                     boolean is = file.renameTo(new File(file.getParentFile(),payloadFilenameMap.get(payload.getId())));
+                    setStatusText("Result file recieved");
                     Log.d(TAG,"renamed: "+is);
                 }
                 catch (Exception e){
