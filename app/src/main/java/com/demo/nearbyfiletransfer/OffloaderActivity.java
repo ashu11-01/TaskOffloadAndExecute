@@ -1,6 +1,7 @@
 package com.demo.nearbyfiletransfer;
 
 import android.animation.Animator;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -50,6 +51,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -88,6 +90,7 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
     OffloaderPayloadCallback payloadCallback;
     Map<Long,Payload> incomingPayloads = new ArrayMap<>();
     Map<Long,String> payloadFilenameMap = new ArrayMap<>();
+    private float[] weightsArray = new float[4];
 
 
     @Override
@@ -115,6 +118,7 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         recyclerExecutersList = findViewById(R.id.recyclerView2);
         layoutManager = new LinearLayoutManager(getApplicationContext(),LinearLayoutManager.HORIZONTAL,false);
         recyclerExecutersList.setLayoutManager(layoutManager);
+        Collections.sort(executerList);
         executersListAdapter = new ExecutersListAdapter(executerList,OffloaderActivity.this);
         recyclerExecutersList.setAdapter(executersListAdapter);
         discoveryPanel =findViewById(R.id.discoveryPanel);
@@ -150,9 +154,6 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
                 }
                 endpointDiscoveryCallback = new OffloaderEndpointDiscoveryCallback();
 
-                SharedPreferences preferences = getSharedPreferences("WeightPreference",MODE_PRIVATE);
-                float v = preferences.getFloat(Constants.SharedPreferenceKeys.RATING_WEIGHT,0.5f);
-                Toast.makeText(this,String.valueOf(v),Toast.LENGTH_SHORT).show();
                 client.startDiscovery(SERVICE_ID,endpointDiscoveryCallback,options).
                         addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
@@ -398,6 +399,15 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         }
     }
 
+    private void getWeights() {
+        SharedPreferences preferences = getApplicationContext().
+                getSharedPreferences("WeightPreference", Context.MODE_PRIVATE);
+        weightsArray[0]= preferences.getFloat(Constants.SharedPreferenceKeys.BATTERY_WEIGHT,0.25f);
+        weightsArray[1]= preferences.getFloat(Constants.SharedPreferenceKeys.RAM_WEIGHT,0.25f);
+        weightsArray[2]= preferences.getFloat(Constants.SharedPreferenceKeys.CPU_WEIGHT,0.25f);
+        weightsArray[3]= preferences.getFloat(Constants.SharedPreferenceKeys.STORAGE_WEIGHT,0.25f);
+    }
+
     private class OffloaderEndpointDiscoveryCallback extends EndpointDiscoveryCallback{
         @Override
         public void onEndpointFound(String s, DiscoveredEndpointInfo discoveredEndpointInfo) {
@@ -405,7 +415,13 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
 
                 ExecuterModel executer = splitAndStoreAdvertisingMessage(discoveredEndpointInfo.getEndpointName());
                 executer.setEndpointId(s);
+                double d = weightsArray[0]*Integer.parseInt(executer.getBattery()) +
+                            weightsArray[1]*Double.parseDouble(executer.getRAM()) +
+                            weightsArray[2]*Float.parseFloat(executer.getRAM()) +
+                            weightsArray[3]*Long.parseLong(executer.getStorage());
+                executer.setUtility(d);
                 executerList.add(executer);
+                Collections.sort(executerList);
                 executersListAdapter.notifyItemInserted(executerList.indexOf(executer));
 
             }

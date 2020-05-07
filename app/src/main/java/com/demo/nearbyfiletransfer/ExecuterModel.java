@@ -2,7 +2,7 @@ package com.demo.nearbyfiletransfer;
 
 import androidx.annotation.NonNull;
 
-public class ExecuterModel  {
+public class ExecuterModel implements Comparable<ExecuterModel>  {
 
     private String codename;
     private String rating;
@@ -15,6 +15,15 @@ public class ExecuterModel  {
     private String storage;
     private String endpointId;
 
+    public double getUtility() {
+        return utility;
+    }
+
+    public void setUtility(double utility) {
+        this.utility = utility;
+    }
+
+    private double utility;
     public String getEndpointId() {
         return endpointId;
     }
@@ -112,5 +121,10 @@ public class ExecuterModel  {
     public String toString() {
         super.toString();
         return this.codename;
+    }
+
+    @Override
+    public int compareTo(ExecuterModel executerModel) {
+        return (int)(this.getUtility() - executerModel.getUtility());
     }
 }

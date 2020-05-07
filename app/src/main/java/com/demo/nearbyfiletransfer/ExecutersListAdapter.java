@@ -16,9 +16,9 @@ import java.util.List;
 
 public class ExecutersListAdapter extends RecyclerView.Adapter<ExecutersListAdapter.ViewHolder> {
 
-    List<ExecuterModel> executerList;
-    Context context;
-    ItemClicked activity;
+    private List<ExecuterModel> executerList;
+    private Context context;
+    private ItemClicked activity;
     public interface ItemClicked{
         void onItemClicked(int position);
     }
@@ -26,6 +26,7 @@ public class ExecutersListAdapter extends RecyclerView.Adapter<ExecutersListAdap
         this.executerList = executerList;
         this.context = context;
         activity = (ItemClicked)context;
+
     }
 
     @NonNull
@@ -42,7 +43,7 @@ public class ExecutersListAdapter extends RecyclerView.Adapter<ExecutersListAdap
         holder.tvIndex.setText(position+1+"");
         ExecuterModel executer = executerList.get(position);
         holder.tvName.setText(executer.getCodename());
-        holder.tvRating.setText(executer.getRating());
+//        holder.tvRating.setText(executer.getRating());
         holder.tvBattery.setText(executer.getBattery()+" %");
         holder.tvRam.setText(executer.getRAM()+" %");
         holder.tvCpu.setText(executer.getCpu()+" MHz");

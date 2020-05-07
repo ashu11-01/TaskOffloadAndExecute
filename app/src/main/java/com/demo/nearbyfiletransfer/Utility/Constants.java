@@ -28,5 +28,9 @@ public class Constants {
         public static final String SYSTEM_WEIGHT="SystemWeight";
         public static final String RATING_WEIGHT="RatingWeight";
         public static final String SERVICE_REQUEST="ServiceRequest";
+        public static final String BATTERY_WEIGHT="BatteryWeight";
+        public static final String RAM_WEIGHT="RamWeight";
+        public static final String CPU_WEIGHT="CpuWeight";
+        public static final String STORAGE_WEIGHT="StorageWeight";
     }
 }
