@@ -44,6 +44,7 @@ public class ExecutersListAdapter extends RecyclerView.Adapter<ExecutersListAdap
         ExecuterModel executer = executerList.get(position);
         holder.tvName.setText(executer.getCodename());
 //        holder.tvRating.setText(executer.getRating());
+        holder.tvRating.setText(String.valueOf(executer.getUtility()));
         holder.tvBattery.setText(executer.getBattery()+" %");
         holder.tvRam.setText(executer.getRAM()+" %");
         holder.tvCpu.setText(executer.getCpu()+" MHz");

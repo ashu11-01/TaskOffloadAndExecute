@@ -16,6 +16,7 @@ import com.demo.nearbyfiletransfer.Utility.Constants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PreferencesMenuManager {
@@ -67,7 +68,7 @@ public class PreferencesMenuManager {
             editor.putFloat(Constants.SharedPreferenceKeys.BATTERY_WEIGHT,weightMap.get("Battery"));
             editor.putFloat(Constants.SharedPreferenceKeys.RAM_WEIGHT,weightMap.get("RAM"));
             editor.putFloat(Constants.SharedPreferenceKeys.CPU_WEIGHT,weightMap.get("CPU"));
-            editor.putFloat(Constants.SharedPreferenceKeys.RAM_WEIGHT,weightMap.get("Storage"));
+            editor.putFloat(Constants.SharedPreferenceKeys.STORAGE_WEIGHT,weightMap.get("Storage"));
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
@@ -85,21 +86,28 @@ public class PreferencesMenuManager {
                 etId[i].setError("Field cannot be empty");
                 isValid = false;
             }
-            try{
-                float d = Float.parseFloat(etId[i].getText().toString());
-                weightMap.put(label[i],d);
-            }
-            catch (NumberFormatException nfe){
-                etId[i].setError("Must be decimal value");
-                isValid = false;
+            else {
+                try {
+                    float d = Float.parseFloat(etId[i].getText().toString());
+                    weightMap.put(label[i], d);
+                } catch (NumberFormatException nfe) {
+                    etId[i].setError("Must be decimal value");
+                    isValid = false;
+                }
             }
         }
-        ArrayList<Float> weights = (ArrayList<Float>) weightMap.values();
-        float sum =0.0f;
-        for(Float d : weights) sum+=d;
-        if(Double.compare(1.0,sum)!=0)  {
-            isValid = false;
-            etId[0].setError("Weights must sum to 1");
+
+        if (isValid) {
+            List<Float> weights = new ArrayList<>();
+            for (String s : label){
+                weights.add(weightMap.get(s));
+            }
+            float sum =0.0f;
+            for(Float d : weights) sum+=d;
+            if(Double.compare(1.0,sum)!=0)  {
+                isValid = false;
+                etId[0].setError("Weights must sum to 1");
+            }
         }
         return isValid;
     }

@@ -118,7 +118,7 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         recyclerExecutersList = findViewById(R.id.recyclerView2);
         layoutManager = new LinearLayoutManager(getApplicationContext(),LinearLayoutManager.HORIZONTAL,false);
         recyclerExecutersList.setLayoutManager(layoutManager);
-        Collections.sort(executerList);
+        Collections.sort(executerList,Collections.<ExecuterModel>reverseOrder());
         executersListAdapter = new ExecutersListAdapter(executerList,OffloaderActivity.this);
         recyclerExecutersList.setAdapter(executersListAdapter);
         discoveryPanel =findViewById(R.id.discoveryPanel);
@@ -406,22 +406,24 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         weightsArray[1]= preferences.getFloat(Constants.SharedPreferenceKeys.RAM_WEIGHT,0.25f);
         weightsArray[2]= preferences.getFloat(Constants.SharedPreferenceKeys.CPU_WEIGHT,0.25f);
         weightsArray[3]= preferences.getFloat(Constants.SharedPreferenceKeys.STORAGE_WEIGHT,0.25f);
+        Log.d(TAG,""+weightsArray[0]+"  "+weightsArray[1]+" "+weightsArray[2]+" "+weightsArray[3]);
     }
 
     private class OffloaderEndpointDiscoveryCallback extends EndpointDiscoveryCallback{
         @Override
         public void onEndpointFound(String s, DiscoveredEndpointInfo discoveredEndpointInfo) {
             if(discoveredEndpointInfo.getServiceId().equals(SERVICE_ID)){
-
+                Toast.makeText(getApplicationContext(),"New Executer found. Swipe the card to view",Toast.LENGTH_SHORT).show();
                 ExecuterModel executer = splitAndStoreAdvertisingMessage(discoveredEndpointInfo.getEndpointName());
                 executer.setEndpointId(s);
+                getWeights();
                 double d = weightsArray[0]*Integer.parseInt(executer.getBattery()) +
                             weightsArray[1]*Double.parseDouble(executer.getRAM()) +
                             weightsArray[2]*Float.parseFloat(executer.getRAM()) +
-                            weightsArray[3]*Long.parseLong(executer.getStorage());
+                            weightsArray[3]*(Long.parseLong(executer.getStorage())/1000);
                 executer.setUtility(d);
                 executerList.add(executer);
-                Collections.sort(executerList);
+                Collections.sort(executerList,Collections.<ExecuterModel>reverseOrder());
                 executersListAdapter.notifyItemInserted(executerList.indexOf(executer));
 
             }
