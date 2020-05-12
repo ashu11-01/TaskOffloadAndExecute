@@ -62,6 +62,26 @@
                 android:background="@drawable/rounded_edge_white">
 
                 <TextView
+                    android:id="@+id/tv_countdown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:textSize="18sp"
+                    app:layout_constraintStart_toEndOf="@+id/textView2"
+                    app:layout_constraintTop_toTopOf="@+id/textView2" />
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/discovery_count_down"
+                    android:textSize="18sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
                     android:id="@+id/tv_rec_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -69,54 +89,7 @@
                     android:text="@string/list_executers"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/btn_startDiscover" />
-
-                <Button
-                    android:id="@+id/btn_startDiscover"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:background="@color/colorPrimary"
-                    android:gravity="center"
-                    android:onClick="onClick"
-                    android:padding="4dp"
-                    android:text="@string/start_discovery"
-                    android:textColor="@android:color/white"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <Button
-                    android:id="@+id/btn_stopDiscover"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="20dp"
-                    android:background="@drawable/rounded_edge_white"
-                    android:gravity="center"
-                    android:onClick="onClick"
-                    android:padding="4dp"
-                    android:text="@string/stop_discovery"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/recyclerView2" />
-
-                <Button
-                    android:id="@+id/btn_proceed"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="20dp"
-                    android:background="@color/colorAccent"
-                    android:gravity="center"
-                    android:onClick="onClick"
-                    android:padding="4dp"
-                    android:text="@string/proceed"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/recyclerView2" />
+                    app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -124,7 +97,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="20dp"
+                    android:layout_marginBottom="10dp"
                     android:padding="4dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/tv_rec_title"
                     tools:layout_editor_absoluteX="20dp" />
             </androidx.constraintlayout.widget.ConstraintLayout>

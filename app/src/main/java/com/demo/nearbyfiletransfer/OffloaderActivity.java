@@ -1,18 +1,13 @@
 package com.demo.nearbyfiletransfer;
 
-import android.animation.Animator;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -30,7 +25,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.demo.nearbyfiletransfer.MenuManager.PreferencesMenuManager;
-import com.demo.nearbyfiletransfer.MenuManager.ServiceRequestManager;
+import com.demo.nearbyfiletransfer.SelectionCriteria.WeightedSumSelection;
 import com.demo.nearbyfiletransfer.Utility.Constants;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
@@ -55,12 +50,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class OffloaderActivity extends AppCompatActivity implements ExecutersListAdapter.ItemClicked {
+public class OffloaderActivity extends AppCompatActivity implements PreferencesMenuManager.PreferencesSetListener {
     private static final String TAG = "OffloaderActivity";
 
     //discoveryPanel views
     TextView tvCodename,tvStatus;
-    Button btnStartDiscover,btnStopDiscover,btnProceed;
     View offloadAction;
     ConstraintLayout discoveryPanel;
     RecyclerView recyclerExecutersList;
@@ -71,7 +65,7 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
     Spinner spExecuter,spOperation;
     Button btnOffload;
     List<ExecuterModel> connectedExecuters = new ArrayList<>();
-    TextView codeFilename,inputFilename;
+    TextView codeFilename,inputFilename,tvCountdown;
     boolean isInAction=false, isDiscovering, isSending=false;
     String codename, SERVICE_ID;
 
@@ -103,6 +97,10 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         options = new DiscoveryOptions.Builder().setStrategy(Strategy.P2P_CLUSTER).build();
         SERVICE_ID=getApplicationContext().getPackageName();
         initViews();
+        //show offloading preference dialoge
+        PreferencesMenuManager manager = new PreferencesMenuManager(OffloaderActivity.this);
+        manager.setPreferenceWeights();
+
     }
 
     private void initViews() {
@@ -112,9 +110,6 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         String codeNameText = getString(R.string.codename)+codename;
         tvCodename.setText(codeNameText);
         tvStatus = findViewById(R.id.tv_off_status);
-        btnStartDiscover = findViewById(R.id.btn_startDiscover);
-        btnStopDiscover = findViewById(R.id.btn_stopDiscover);
-        btnProceed = findViewById(R.id.btn_proceed);
         recyclerExecutersList = findViewById(R.id.recyclerView2);
         layoutManager = new LinearLayoutManager(getApplicationContext(),LinearLayoutManager.HORIZONTAL,false);
         recyclerExecutersList.setLayoutManager(layoutManager);
@@ -130,14 +125,7 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         inputFilename = findViewById(R.id.tv_input_file_display);
         spExecuter = findViewById(R.id.sp_choose_exec_);
         btnOffload = findViewById(R.id.btn_offload);
-       /* List<String> extensionList = new ArrayList<>();
-        extensionList.add("(.py) Python");
-        extensionList.add("(.cpp) C++");
-        ArrayAdapter<String> operationAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, extensionList);
-        operationAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
-        FileTypeSelectedListener opListener = new FileTypeSelectedListener();
-        spOperation.setOnItemSelectedListener(opListener);
-        spOperation.setAdapter(operationAdapter);*/
+        tvCountdown=findViewById(R.id.tv_countdown);
         ArrayAdapter<ExecuterModel> executerAdapter = new ArrayAdapter<>(this,R.layout.support_simple_spinner_dropdown_item,connectedExecuters);
         executerAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         ExecuterSelectedListener exListener = new ExecuterSelectedListener();
@@ -147,40 +135,6 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
 
     public void onClick(View view){
         switch (view.getId()){
-            case R.id.btn_startDiscover:
-                if(isDiscovering){
-                    Toast.makeText(this,"Already Discovering",Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                endpointDiscoveryCallback = new OffloaderEndpointDiscoveryCallback();
-
-                client.startDiscovery(SERVICE_ID,endpointDiscoveryCallback,options).
-                        addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Toast.makeText(OffloaderActivity.this,"Discovering",Toast.LENGTH_SHORT).show();
-                                setStatusText("Discovering Nearby Executors");
-                                isDiscovering = true;
-                            }
-                        }).
-                        addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(OffloaderActivity.this,"Discovery failed",Toast.LENGTH_SHORT).show();
-                                setStatusText("Discovery Failed");
-                                isDiscovering = false;
-                            }
-                        });
-                break;
-
-            case R.id.btn_stopDiscover:
-                stopDiscovery();
-                break;
-
-            case R.id.btn_proceed:
-                goToAction();
-                break;
-
             case R.id.btn_offload:
                 sendTaskData();
                 break;
@@ -193,6 +147,32 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
                 selectFile(REQUEST_INPUT_CHOOSE);
                 break;
         }
+    }
+
+    private void startDiscovery(){
+        if(isDiscovering){
+            Toast.makeText(this,"Already Discovering",Toast.LENGTH_SHORT).show();
+            return;
+        }
+        endpointDiscoveryCallback = new OffloaderEndpointDiscoveryCallback();
+
+        client.startDiscovery(SERVICE_ID,endpointDiscoveryCallback,options).
+                addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(OffloaderActivity.this,"Discovering",Toast.LENGTH_SHORT).show();
+                        setStatusText("Discovering Nearby Executors");
+                        isDiscovering = true;
+                    }
+                }).
+                addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(OffloaderActivity.this,"Discovery failed",Toast.LENGTH_SHORT).show();
+                        setStatusText("Discovery Failed");
+                        isDiscovering = false;
+                    }
+                });
     }
 
     private void selectFile(int requestCode) {
@@ -234,31 +214,6 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.preferences_menu,menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        boolean result=false;
-        switch (item.getItemId()){
-            case R.id.weights:
-                PreferencesMenuManager manager = new PreferencesMenuManager(OffloaderActivity.this);
-                manager.setPreferenceWeights();
-                result= true;
-            case R.id.service_type:
-                ServiceRequestManager.setServiceRequest(getApplicationContext());
-                result= true;
-            default:
-                result =super.onOptionsItemSelected(item);
-        }
-        return result;
-    }
-
     private void stopDiscovery(){
         if(!isDiscovering){
             Toast.makeText(this,"Currently Not Discovering",Toast.LENGTH_SHORT).show();
@@ -268,75 +223,10 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         setStatusText("Discovery Stopped");
         isDiscovering = false;
     }
-    private void goToAction() {
-        stopDiscovery();
-        discoveryPanel.animate().alpha(0.0f).setListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animator) {
-                discoveryPanel.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animator) {
-
-            }
-        });
-        offloadAction.animate().alpha(1.0f).setListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animator) {
-                offloadAction.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animator) {
-
-            }
-        });
-        isInAction = true;
-        initActionViews();
-    }
 
     private void setStatusText(String message){
         String statusText = getString(R.string.status)+message;
         tvStatus.setText(statusText);
-    }
-
-    @Override
-    public void onItemClicked(int position) {
-        final ExecuterModel executer = executerList.get(position);
-        connectionLifecycleCallback = new OffloaderConnectionLifecycleCallback();
-        client.requestConnection(codename,executer.getEndpointId(),connectionLifecycleCallback)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                setStatusText("Requested connection to: "+executer.getCodename());
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(OffloaderActivity.this,"Could not request connection",Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     private int searchExecuterById(String endpointId){
@@ -371,17 +261,44 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         isSending = false;
     }
 
-    private class FileTypeSelectedListener implements AdapterView.OnItemSelectedListener{
+    @Override
+    public void onPreferencesSetListener(int minutes) {
+        startDiscovery();
+        new CountDownTimer(120000, 1) {
+            @Override
+            public void onTick(long l) {
+                long seconds=l/1000;
+                String show_min = (seconds/60 < 10 ? "0"+seconds/60 : ""+seconds/60);
+                String show_sec = (seconds%60 < 10 ? "0"+seconds%60 : ""+seconds%60);
+                tvCountdown.setText(show_min+":"+show_sec);
+            }
 
-        @Override
-        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+            @Override
+            public void onFinish() {
+                stopDiscovery();
+                requestConnectionToBestExecuter();
+            }
+        }.start();
+    }
 
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> adapterView) {
-
-        }
+    private void requestConnectionToBestExecuter() {
+        executerList = WeightedSumSelection.weightedSumBestExecuters(executerList,getApplicationContext());
+        try{
+            final ExecuterModel bestExecuter = executerList.get(0);
+            connectionLifecycleCallback = new OffloaderConnectionLifecycleCallback();
+            client.requestConnection(codename,bestExecuter.getEndpointId(),connectionLifecycleCallback).
+                    addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    setStatusText("Requested connection to: "+bestExecuter.getCodename());
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    setStatusText("Could not request connection to: "+bestExecuter.getCodename());
+                }
+            });
+        }catch (IndexOutOfBoundsException e ){}
     }
 
     private class ExecuterSelectedListener implements AdapterView.OnItemSelectedListener{
@@ -399,36 +316,20 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         }
     }
 
-    private void getWeights() {
-        SharedPreferences preferences = getApplicationContext().
-                getSharedPreferences("WeightPreference", Context.MODE_PRIVATE);
-        weightsArray[0]= preferences.getFloat(Constants.SharedPreferenceKeys.BATTERY_WEIGHT,0.25f);
-        weightsArray[1]= preferences.getFloat(Constants.SharedPreferenceKeys.RAM_WEIGHT,0.25f);
-        weightsArray[2]= preferences.getFloat(Constants.SharedPreferenceKeys.CPU_WEIGHT,0.25f);
-        weightsArray[3]= preferences.getFloat(Constants.SharedPreferenceKeys.STORAGE_WEIGHT,0.25f);
-        Log.d(TAG,""+weightsArray[0]+"  "+weightsArray[1]+" "+weightsArray[2]+" "+weightsArray[3]);
-    }
+
 
     private class OffloaderEndpointDiscoveryCallback extends EndpointDiscoveryCallback{
+
         @Override
         public void onEndpointFound(String s, DiscoveredEndpointInfo discoveredEndpointInfo) {
             if(discoveredEndpointInfo.getServiceId().equals(SERVICE_ID)){
                 Toast.makeText(getApplicationContext(),"New Executer found. Swipe the card to view",Toast.LENGTH_SHORT).show();
+
                 ExecuterModel executer = splitAndStoreAdvertisingMessage(discoveredEndpointInfo.getEndpointName());
                 executer.setEndpointId(s);
-                getWeights();
-                double d = weightsArray[0]*Integer.parseInt(executer.getBattery()) +
-                            weightsArray[1]*Double.parseDouble(executer.getRAM()) +
-                            weightsArray[2]*Float.parseFloat(executer.getRAM()) +
-                            weightsArray[3]*(Long.parseLong(executer.getStorage())/1000);
-                executer.setUtility(d);
                 executerList.add(executer);
-                Collections.sort(executerList,Collections.<ExecuterModel>reverseOrder());
                 executersListAdapter.notifyItemInserted(executerList.indexOf(executer));
-
             }
-
-//                Toast.makeText(OffloaderActivity.this,discoveredEndpointInfo.getEndpointName()+" found",Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -463,8 +364,7 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         public void onConnectionResult(String s, ConnectionResolution connectionResolution) {
             int position = searchExecuterById(s);
             if(connectionResolution.getStatus().isSuccess()){
-                Toast.makeText(OffloaderActivity.this,"Connected successfully to: "+executerList.get(position).getCodename(),Toast.LENGTH_SHORT).show();
-
+                setStatusText("Connected to: "+executerList.get(position).getCodename());
                 executerList.get(position).setStatus(Constants.ConnectionStatus.CONNECTED);
                 executersListAdapter.notifyItemChanged(position);
                 connectedExecuters.add(executerList.get(position));

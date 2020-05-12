@@ -29,7 +29,7 @@
     <string name="code_file">Choose code file: </string>
     <string name="browse">Browse</string>
     <string name="list_executers">List of Nearby Executers</string>
-    <string name="slider_inst">Set your preferences \n (Each weight value must be a float and sum of weight must sum to 1)</string>
+    <string name="slider_inst">Set your preferences \n(Each weight must be a decimal value between 0 and 1.Also sum of weights must be 1)</string>
     <string name="system_param_pref">System Parameter</string>
     <string name="broker_rating_pref">Broker Rating</string>
     <string name="percent">%</string>
@@ -37,4 +37,14 @@
     <string name="storage_unit">KB</string>
     <string name="input_file_name">Input Filename</string>
     <string name="code_file_name">Code Filename</string>
+    <string name="discovery_count_down">Discovery stops in: </string>
+    <string-array name="count_minutes">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string name="discovery_stops_in">Discovery stops in</string>
+    <string name="minutes">minutes</string>
 </resources>

@@ -7,8 +7,10 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.demo.nearbyfiletransfer.R;
@@ -22,11 +24,18 @@ import java.util.Map;
 public class PreferencesMenuManager {
     private Context context;
     private EditText etBattery,etRam,etCpu,etStorage;
+    private Spinner sp_countdown;
     private Map<String,Float> weightMap = new HashMap<>();
+    private int currentMinutes=1;
+    PreferencesSetListener activity;
     public PreferencesMenuManager(Context context){
         this.context= context;
+        activity = (PreferencesSetListener) context;
     }
-    
+
+    public interface PreferencesSetListener{
+        void onPreferencesSetListener(int minutes);
+    }
     public void setPreferenceWeights(){
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -48,9 +57,17 @@ public class PreferencesMenuManager {
             @Override
             public void onClick(View view) {
                 writeWeightsToSharedPreference(weightsDialog);
+                activity.onPreferencesSetListener(currentMinutes);
+                weightsDialog.cancel();
             }
         });
-        
+        Button reset = view.findViewById(R.id.btn_reset);
+        reset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                etBattery.getText().clear();etRam.getText().clear();etCpu.getText().clear();etStorage.getText().clear();
+            }
+        });
         weightsDialog.setCancelable(false);
         weightsDialog.create();
         weightsDialog.show();
@@ -74,7 +91,6 @@ public class PreferencesMenuManager {
         }
         editor.apply();
         Toast.makeText(context,"Weights set successfully",Toast.LENGTH_SHORT).show();
-        weightsDialog.cancel();
     }
 
     private boolean validateWeights() {
@@ -117,7 +133,21 @@ public class PreferencesMenuManager {
         etRam=view.findViewById(R.id.et_ram_wt);
         etCpu = view.findViewById(R.id.et_cpu_wt);
         etStorage=view.findViewById(R.id.et_storage_wt);
+        sp_countdown=view.findViewById(R.id.sp_countdown);
+        sp_countdown.setSelection(0);
+        sp_countdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if(currentMinutes!=i){
+                    currentMinutes = Integer.parseInt((String)adapterView.getItemAtPosition(i));
+                }
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
     }
     
 }
