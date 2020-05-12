@@ -7,7 +7,6 @@ import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -50,7 +49,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class OffloaderActivity extends AppCompatActivity implements PreferencesMenuManager.PreferencesSetListener {
+public class OffloaderActivity extends AppCompatActivity implements ExecutersListAdapter.ItemClicked,PreferencesMenuManager.PreferencesSetListener {
     private static final String TAG = "OffloaderActivity";
 
     //discoveryPanel views
@@ -110,6 +109,7 @@ public class OffloaderActivity extends AppCompatActivity implements PreferencesM
         String codeNameText = getString(R.string.codename)+codename;
         tvCodename.setText(codeNameText);
         tvStatus = findViewById(R.id.tv_off_status);
+        tvCountdown=findViewById(R.id.tv_countdown);
         recyclerExecutersList = findViewById(R.id.recyclerView2);
         layoutManager = new LinearLayoutManager(getApplicationContext(),LinearLayoutManager.HORIZONTAL,false);
         recyclerExecutersList.setLayoutManager(layoutManager);
@@ -125,7 +125,6 @@ public class OffloaderActivity extends AppCompatActivity implements PreferencesM
         inputFilename = findViewById(R.id.tv_input_file_display);
         spExecuter = findViewById(R.id.sp_choose_exec_);
         btnOffload = findViewById(R.id.btn_offload);
-        tvCountdown=findViewById(R.id.tv_countdown);
         ArrayAdapter<ExecuterModel> executerAdapter = new ArrayAdapter<>(this,R.layout.support_simple_spinner_dropdown_item,connectedExecuters);
         executerAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         ExecuterSelectedListener exListener = new ExecuterSelectedListener();
@@ -264,7 +263,7 @@ public class OffloaderActivity extends AppCompatActivity implements PreferencesM
     @Override
     public void onPreferencesSetListener(int minutes) {
         startDiscovery();
-        new CountDownTimer(120000, 1) {
+        new CountDownTimer(minutes*60*1000, 1) {
             @Override
             public void onTick(long l) {
                 long seconds=l/1000;
@@ -301,13 +300,18 @@ public class OffloaderActivity extends AppCompatActivity implements PreferencesM
         }catch (IndexOutOfBoundsException e ){}
     }
 
+    @Override
+    public void onItemClicked(int position) {
+
+    }
+
     private class ExecuterSelectedListener implements AdapterView.OnItemSelectedListener{
 
 
         @Override
         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
             selectedExecuter = (ExecuterModel) adapterView.getItemAtPosition(i);
-            Log.d(TAG,selectedExecuter.getCodename());
+//            Log.d(TAG,selectedExecuter.getCodename());
         }
 
         @Override
@@ -340,7 +344,7 @@ public class OffloaderActivity extends AppCompatActivity implements PreferencesM
 
     private ExecuterModel splitAndStoreAdvertisingMessage(String s) {
         String parts[] = s.split("/");
-        Log.d(TAG,"split and store: "+parts[0]);
+//        Log.d(TAG,"split and store: "+parts[0]);
         ExecuterModel executer = new ExecuterModel(parts[0],parts[1],parts[2],parts[3],parts[4],parts[5],parts[6],parts[7]);
         return executer;
     }
@@ -351,7 +355,8 @@ public class OffloaderActivity extends AppCompatActivity implements PreferencesM
             if(!connectionInfo.isIncomingConnection()){
                 AlertDialog.Builder showAuthToken = new AlertDialog.Builder(OffloaderActivity.this);
                 showAuthToken.setTitle("New Connection Initiated");
-                showAuthToken.setMessage("Executer Codename: "+connectionInfo.getEndpointName().split("/")[0] +"\n"+"Authentication Token: "+connectionInfo.getAuthenticationToken());
+                showAuthToken.setMessage("Executer Codename: "+connectionInfo.getEndpointName().split("/")[0] +"\n"
+                        +"Authentication Token: "+connectionInfo.getAuthenticationToken());
                 showAuthToken.setCancelable(true);
                 showAuthToken.create();
                 showAuthToken.show();
@@ -368,6 +373,12 @@ public class OffloaderActivity extends AppCompatActivity implements PreferencesM
                 executerList.get(position).setStatus(Constants.ConnectionStatus.CONNECTED);
                 executersListAdapter.notifyItemChanged(position);
                 connectedExecuters.add(executerList.get(position));
+                //connection estblished, proceed to choosing file and offloading task
+                stopDiscovery();
+                discoveryPanel.setVisibility(View.GONE);
+                findViewById(R.id.offloadAction).setVisibility(View.VISIBLE);
+                initActionViews();
+                setStatusText("Ready to offload. Please choose files below.");
             }
             else if(connectionResolution.getStatus().isCanceled()){
                 Toast.makeText(OffloaderActivity.this,s+" rejected your connection request",Toast.LENGTH_SHORT).show();
@@ -416,7 +427,7 @@ public class OffloaderActivity extends AppCompatActivity implements PreferencesM
                     String filename="rec.jpg";
                     boolean is = file.renameTo(new File(file.getParentFile(),payloadFilenameMap.get(payload.getId())));
                     setStatusText("Result file recieved");
-                    Log.d(TAG,"renamed: "+is);
+//                    Log.d(TAG,"renamed: "+is);
                 }
                 catch (Exception e){
                     e.printStackTrace();
@@ -424,13 +435,13 @@ public class OffloaderActivity extends AppCompatActivity implements PreferencesM
                 break;
         }
     }
-    private String[] getFilename(String message){
-        String[] parts = message.split(":");
+        private String[] getFilename(String message){
+            String[] parts = message.split(":");
 
-        long payloadId = Long.parseLong(parts[0]);
-        String filename=parts[1];
-        payloadFilenameMap.put(payloadId,filename);
-        return parts;
-    }
+            long payloadId = Long.parseLong(parts[0]);
+            String filename=parts[1];
+            payloadFilenameMap.put(payloadId,filename);
+            return parts;
+        }
     }
 }
