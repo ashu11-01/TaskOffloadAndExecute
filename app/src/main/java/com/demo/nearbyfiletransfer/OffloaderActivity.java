@@ -6,11 +6,13 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.demo.nearbyfiletransfer.MenuManager.PreferencesMenuManager;
+import com.demo.nearbyfiletransfer.SelectionCriteria.TopsisSelection;
 import com.demo.nearbyfiletransfer.SelectionCriteria.WeightedSumSelection;
 import com.demo.nearbyfiletransfer.Utility.Constants;
 import com.google.android.gms.nearby.Nearby;
@@ -63,6 +66,7 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
     //offloaderActionPanel views
     Spinner spExecuter,spOperation;
     Button btnOffload;
+    Chronometer mChronometer;
     List<ExecuterModel> connectedExecuters = new ArrayList<>();
     TextView codeFilename,inputFilename,tvCountdown;
     boolean isInAction=false, isDiscovering, isSending=false;
@@ -83,6 +87,7 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
     OffloaderPayloadCallback payloadCallback;
     Map<Long,Payload> incomingPayloads = new ArrayMap<>();
     Map<Long,String> payloadFilenameMap = new ArrayMap<>();
+    Map<Long,String>payloadSenderMap = new ArrayMap<>();
     private float[] weightsArray = new float[4];
 
 
@@ -121,6 +126,18 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
 
     private void initActionViews(){
         //offloaderAction
+        mChronometer=(Chronometer) findViewById(R.id.chronometer);
+        mChronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+            @Override
+            public void onChronometerTick(Chronometer chronometer) {
+                long elapsedMillis =  SystemClock.elapsedRealtime() - chronometer.getBase();
+                if(elapsedMillis>3600000L)
+                    mChronometer.setFormat("0%s");
+                else
+                    mChronometer.setFormat("00:%s");
+            }
+        });
+
         codeFilename=findViewById(R.id.tv_code_file_display);
         inputFilename = findViewById(R.id.tv_input_file_display);
         spExecuter = findViewById(R.id.sp_choose_exec_);
@@ -136,6 +153,8 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         switch (view.getId()){
             case R.id.btn_offload:
                 sendTaskData();
+                mChronometer.setBase(SystemClock.elapsedRealtime());
+                mChronometer.start();
                 break;
 
             case R.id.btn_code:
@@ -261,7 +280,7 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
     }
 
     @Override
-    public void onPreferencesSetListener(int minutes) {
+    public void onPreferencesSetListener(int minutes, final Constants.SelectionMethod selectionMethod) {
         startDiscovery();
         new CountDownTimer(minutes*60*1000, 1) {
             @Override
@@ -275,13 +294,27 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
             @Override
             public void onFinish() {
                 stopDiscovery();
-                requestConnectionToBestExecuter();
+                requestConnectionToBestExecuter(selectionMethod);
+                executersListAdapter.notifyDataSetChanged();
             }
         }.start();
+
     }
 
-    private void requestConnectionToBestExecuter() {
-        executerList = WeightedSumSelection.weightedSumBestExecuters(executerList,getApplicationContext());
+    private void requestConnectionToBestExecuter(Constants.SelectionMethod selectionMethod) {
+        switch (selectionMethod){
+            case WEIGHTED_SUM:
+                executerList = WeightedSumSelection.weightedSumBestExecuters(executerList,getApplicationContext());
+                break;
+            case TOPSIS:
+                executerList = TopsisSelection.getTopsisBestExecuters(getApplicationContext(), executerList);
+                break;
+        }
+//        Collections.sort(executerList, Collections.<ExecuterModel>reverseOrder());
+        //executersListAdapter.n
+//        for(int i=0;i<executerList.size();i++){
+//            Log.d(TAG,(i+1) + " " +executerList.get(i).getCodename() + " " + executerList.get(i).getUtility());
+//        }
         try{
             final ExecuterModel bestExecuter = executerList.get(0);
             connectionLifecycleCallback = new OffloaderConnectionLifecycleCallback();
@@ -396,14 +429,25 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
     private class OffloaderPayloadCallback extends PayloadCallback{
         @Override
         public void onPayloadReceived(String s, Payload payload) {
+            int position = searchExecuterById(s);
             incomingPayloads.put(payload.getId(),payload);
+            if(position!=-1)
+                payloadSenderMap.put(payload.getId(),executerList.get(position).getCodename());
         }
 
         @Override
         public void onPayloadTransferUpdate(String s, PayloadTransferUpdate payloadTransferUpdate) {
             if(payloadTransferUpdate.getStatus()==PayloadTransferUpdate.Status.SUCCESS){
-                if(incomingPayloads.containsKey(payloadTransferUpdate.getPayloadId()))             //update for incoming payload
+                if(incomingPayloads.containsKey(payloadTransferUpdate.getPayloadId())) {           //update for incoming payload
                     processRecievedPayload(incomingPayloads.get(payloadTransferUpdate.getPayloadId()));
+                    mChronometer.stop();
+                   /* AlertDialog.Builder alertDialog = new AlertDialog.Builder(getApplicationContext());
+                    final AlertDialog dialog = alertDialog.create();
+                    dialog.setTitle("Result Recieved");
+                    dialog.setMessage("Output file recieved in: "+mChronometer.getText().toString());
+                    dialog.setCancelable(true);*/
+//                    dialog.show();
+                }
                 else           //update for outgoing payload
                     Toast.makeText(OffloaderActivity.this,"sent successfully",Toast.LENGTH_SHORT).show();
             }

@@ -144,7 +144,14 @@
             app:layout_constraintStart_toStartOf="@+id/btn_code"
             app:layout_constraintTop_toBottomOf="@+id/tv_code_file_display" />
             -->
-
+        <Chronometer
+            android:id="@+id/chronometer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_offload"
+            app:layout_constraintEnd_toStartOf="@+id/btn_offload"
+            app:layout_constraintStart_toStartOf="@+id/tv_input_file_display"
+            app:layout_constraintTop_toTopOf="@+id/btn_offload" />
         <Button
             android:id="@+id/btn_offload"
             android:layout_width="wrap_content"

@@ -169,7 +169,7 @@
                         connectionLifecycleCallback,options).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-//                        Toast.makeText(ExecuterActivity.this,"Advertising",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ExecuterActivity.this,"Advertising",Toast.LENGTH_SHORT).show();
                         isAdvertising = true;
                         setStatusText("Advertising");
                     }
@@ -189,7 +189,15 @@
                 break;
 
             case R.id.btn_execute:
-                String command = "python source.py < input.txt > output.txt";
+                String codeFile="",inputFile="";
+                for(Map.Entry<Long,String> entry : payloadFilenameMap.entrySet()){
+                    String filename = entry.getValue();
+                    if(filename.charAt(filename.length()-1)=='y')
+                        codeFile=filename;
+                    else if(filename.charAt(filename.length()-1)=='t')
+                        inputFile = filename;
+                }
+                String command = "python " + codeFile + " < " + inputFile+" > output.txt";
                 ClipboardManager manager =(ClipboardManager) getApplicationContext().getSystemService(CLIPBOARD_SERVICE);
                 ClipData clipData = ClipData.newPlainText("command",command);
                 manager.setPrimaryClip(clipData);

@@ -45,6 +45,10 @@
         <item>4</item>
         <item>5</item>
     </string-array>
+    <string-array name="selection_methods">
+        <item>Weighted sum</item>
+        <item>TOPSIS</item>
+    </string-array>
     <string name="discovery_stops_in">Discovery stops in</string>
     <string name="minutes">minutes</string>
 </resources>

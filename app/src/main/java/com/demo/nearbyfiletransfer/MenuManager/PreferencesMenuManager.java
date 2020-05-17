@@ -24,9 +24,10 @@ import java.util.Map;
 public class PreferencesMenuManager {
     private Context context;
     private EditText etBattery,etRam,etCpu,etStorage;
-    private Spinner sp_countdown;
+    private Spinner sp_countdown,sp_selection;
     private Map<String,Float> weightMap = new HashMap<>();
     private int currentMinutes=1;
+    private com.demo.nearbyfiletransfer.Utility.Constants.SelectionMethod currentSelection= Constants.SelectionMethod.WEIGHTED_SUM;
     PreferencesSetListener activity;
     public PreferencesMenuManager(Context context){
         this.context= context;
@@ -34,7 +35,7 @@ public class PreferencesMenuManager {
     }
 
     public interface PreferencesSetListener{
-        void onPreferencesSetListener(int minutes);
+        void onPreferencesSetListener(int minutes, Constants.SelectionMethod selectionMethod);
     }
     public void setPreferenceWeights(){
 
@@ -56,9 +57,15 @@ public class PreferencesMenuManager {
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                writeWeightsToSharedPreference(weightsDialog);
-                activity.onPreferencesSetListener(currentMinutes);
-                weightsDialog.cancel();
+                if(validateWeights()){
+                    weightsDialog.cancel();
+                    writeWeightsToSharedPreference();
+                    activity.onPreferencesSetListener(currentMinutes,currentSelection);
+                }
+                else {
+                    Toast.makeText(context, "Please set proper weight values", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
         Button reset = view.findViewById(R.id.btn_reset);
@@ -73,24 +80,20 @@ public class PreferencesMenuManager {
         weightsDialog.show();
     }
 
-    private void writeWeightsToSharedPreference(AlertDialog weightsDialog) {
-        if(!validateWeights()){
-            Toast.makeText(context, "Please set proper weight values", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        SharedPreferences preferences = new ContextWrapper(context).
-                getSharedPreferences("WeightPreference",Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        try {
-            editor.putFloat(Constants.SharedPreferenceKeys.BATTERY_WEIGHT,weightMap.get("Battery"));
-            editor.putFloat(Constants.SharedPreferenceKeys.RAM_WEIGHT,weightMap.get("RAM"));
-            editor.putFloat(Constants.SharedPreferenceKeys.CPU_WEIGHT,weightMap.get("CPU"));
-            editor.putFloat(Constants.SharedPreferenceKeys.STORAGE_WEIGHT,weightMap.get("Storage"));
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-        editor.apply();
-        Toast.makeText(context,"Weights set successfully",Toast.LENGTH_SHORT).show();
+    private void writeWeightsToSharedPreference() {
+            SharedPreferences preferences = new ContextWrapper(context).
+                    getSharedPreferences("WeightPreference", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            try {
+                editor.putFloat(Constants.SharedPreferenceKeys.BATTERY_WEIGHT, weightMap.get("Battery"));
+                editor.putFloat(Constants.SharedPreferenceKeys.RAM_WEIGHT, weightMap.get("RAM"));
+                editor.putFloat(Constants.SharedPreferenceKeys.CPU_WEIGHT, weightMap.get("CPU"));
+                editor.putFloat(Constants.SharedPreferenceKeys.STORAGE_WEIGHT, weightMap.get("Storage"));
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+            editor.apply();
+            Toast.makeText(context, "Weights set successfully", Toast.LENGTH_SHORT).show();
     }
 
     private boolean validateWeights() {
@@ -140,6 +143,26 @@ public class PreferencesMenuManager {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if(currentMinutes!=i){
                     currentMinutes = Integer.parseInt((String)adapterView.getItemAtPosition(i));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        sp_selection = view.findViewById(R.id.sp_selection_method);
+        sp_selection.setSelection(0);
+        sp_selection.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                switch (i){
+                    case 0:
+                        currentSelection = Constants.SelectionMethod.WEIGHTED_SUM;
+                        break;
+                    case 1:
+                        currentSelection = Constants.SelectionMethod.TOPSIS;
+                        break;
                 }
             }
 
