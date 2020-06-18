@@ -1,6 +1,7 @@
 package com.demo.nearbyfiletransfer.SelectionCriteria;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.demo.nearbyfiletransfer.ExecuterModel;
 import java.util.Collections;
@@ -57,6 +58,9 @@ public class TopsisSelection {
             parameterMatrix[i][NEGATIVE_IDEAL_DISTANCE_INDEX] = Math.sqrt(sum_negative);
             executerList.get(i).setUtility(parameterMatrix[i][NEGATIVE_IDEAL_DISTANCE_INDEX] / (parameterMatrix[i][POSITIVE_IDEAL_DISTANCE_INDEX] + parameterMatrix[i][NEGATIVE_IDEAL_DISTANCE_INDEX]));
         }
+        for(int i=0;i<executerList.size()+3;i++)
+            for(int j=0;j<7;j++)
+                Log.d("topsis",parameterMatrix[i][j]+"");
         Collections.sort(executerList,Collections.<ExecuterModel>reverseOrder());
         return executerList;
     }

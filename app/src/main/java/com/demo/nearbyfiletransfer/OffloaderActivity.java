@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -312,9 +313,9 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
         }
 //        Collections.sort(executerList, Collections.<ExecuterModel>reverseOrder());
         //executersListAdapter.n
-//        for(int i=0;i<executerList.size();i++){
-//            Log.d(TAG,(i+1) + " " +executerList.get(i).getCodename() + " " + executerList.get(i).getUtility());
-//        }
+        for(int i=0;i<executerList.size();i++){
+            Log.d(TAG,(i+1) + " " +executerList.get(i).getCodename() + " " + executerList.get(i).getUtility());
+        }
         try{
             final ExecuterModel bestExecuter = executerList.get(0);
             connectionLifecycleCallback = new OffloaderConnectionLifecycleCallback();
