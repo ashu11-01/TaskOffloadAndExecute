@@ -67,7 +67,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Service Available: "
+            android:text="Avl Service: "
             android:textColor="#000000"
             android:textSize="22.5sp"
             android:textStyle="bold"
