@@ -20,7 +20,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:text="@string/role_offloader"
-            android:textSize="18sp"
+            android:textColor="#000000"
+            android:textSize="22.5sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -30,7 +31,8 @@
             android:layout_width="280dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
-            android:textSize="18sp"
+            android:textColor="#000000"
+            android:textSize="22.5sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/tv_exec_conn"
             app:layout_constraintTop_toTopOf="parent" />
@@ -57,6 +59,7 @@
             android:layout_marginTop="16dp"
             android:gravity="center_horizontal"
             android:text="@string/rec_off"
+            android:textColor="#000000"
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
@@ -69,6 +72,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="10dp"
             android:text="@string/code_file_name"
+            android:textColor="#000000"
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView7" />
@@ -79,6 +83,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:layout_marginTop="10dp"
+            android:textColor="#000000"
             android:textSize="20sp"
             app:layout_constraintStart_toEndOf="@+id/tv_code_filename"
             app:layout_constraintTop_toBottomOf="@+id/textView7" />
@@ -90,6 +95,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="10dp"
             android:text="@string/input_file_name"
+            android:textColor="#000000"
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_code_filename2" />
@@ -100,6 +106,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:layout_marginTop="10dp"
+            android:textColor="#000000"
             android:textSize="20sp"
             app:layout_constraintStart_toEndOf="@+id/tv_input_filename"
             app:layout_constraintTop_toBottomOf="@+id/tv_code_filename2" />
