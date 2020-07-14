@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Nearby File Transfer</string>
+    <string name="app_name">Nearby-Offload</string>
     <string name="role_executer">Executer</string>
     <string name="role_offloader">Offloader</string>
     <string name="choose_role">Choose Your Role</string>
