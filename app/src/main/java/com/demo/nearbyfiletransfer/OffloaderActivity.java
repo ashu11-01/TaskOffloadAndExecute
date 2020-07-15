@@ -8,7 +8,6 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -281,9 +280,9 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
     }
 
     @Override
-    public void onPreferencesSetListener(int minutes, final Constants.SelectionMethod selectionMethod) {
+    public void onPreferencesSetListener(int seconds, final Constants.SelectionMethod selectionMethod) {
         startDiscovery();
-        new CountDownTimer(minutes*60*1000, 1) {
+        new CountDownTimer(seconds*1000, 1) {
             @Override
             public void onTick(long l) {
                 long seconds=l/1000;
@@ -295,7 +294,10 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
             @Override
             public void onFinish() {
                 stopDiscovery();
-                requestConnectionToBestExecuter(selectionMethod);
+                if(executerList.size()>0)
+                    requestConnectionToBestExecuter(selectionMethod);
+                else
+                    Toast.makeText(OffloaderActivity.this,"No executers found. Try Again.",Toast.LENGTH_SHORT).show();
                 executersListAdapter.notifyDataSetChanged();
             }
         }.start();
@@ -303,19 +305,22 @@ public class OffloaderActivity extends AppCompatActivity implements ExecutersLis
     }
 
     private void requestConnectionToBestExecuter(Constants.SelectionMethod selectionMethod) {
-        switch (selectionMethod){
-            case WEIGHTED_SUM:
-                executerList = WeightedSumSelection.weightedSumBestExecuters(executerList,getApplicationContext());
-                break;
-            case TOPSIS:
-                executerList = TopsisSelection.getTopsisBestExecuters(getApplicationContext(), executerList);
-                break;
+        if (executerList.size() > 1) {
+            switch (selectionMethod) {
+                case WEIGHTED_SUM:
+                    executerList = WeightedSumSelection.weightedSumBestExecuters(executerList, getApplicationContext());
+                    break;
+                case TOPSIS:
+                    executerList = TopsisSelection.getTopsisBestExecuters(getApplicationContext(), executerList);
+                    break;
+            }
         }
+
 //        Collections.sort(executerList, Collections.<ExecuterModel>reverseOrder());
         //executersListAdapter.n
-        for(int i=0;i<executerList.size();i++){
+        /*for(int i=0;i<executerList.size();i++){
             Log.d(TAG,(i+1) + " " +executerList.get(i).getCodename() + " " + executerList.get(i).getUtility());
-        }
+        }*/
         try{
             final ExecuterModel bestExecuter = executerList.get(0);
             connectionLifecycleCallback = new OffloaderConnectionLifecycleCallback();

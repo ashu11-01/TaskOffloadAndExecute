@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Nearby File Transfer</string>
+    <string name="app_name">Nearby-Offload</string>
     <string name="role_executer">Executer</string>
     <string name="role_offloader">Offloader</string>
     <string name="choose_role">Choose Your Role</string>
@@ -39,16 +39,16 @@
     <string name="code_file_name">Code Filename</string>
     <string name="discovery_count_down">Discovery stops in: </string>
     <string-array name="count_minutes">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>120</item>
+        <item>180</item>
     </string-array>
     <string-array name="selection_methods">
-        <item>Weighted sum</item>
+        <item>MAAU</item>
         <item>TOPSIS</item>
     </string-array>
     <string name="discovery_stops_in">Discovery stops in</string>
-    <string name="minutes">minutes</string>
+    <string name="seconds">sec</string>
 </resources>
