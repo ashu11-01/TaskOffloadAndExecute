@@ -33,4 +33,8 @@ public class Constants {
         public static final String CPU_WEIGHT="CpuWeight";
         public static final String STORAGE_WEIGHT="StorageWeight";
     }
+
+    public enum SelectionMethod{
+        WEIGHTED_SUM,TOPSIS
+    }
 }

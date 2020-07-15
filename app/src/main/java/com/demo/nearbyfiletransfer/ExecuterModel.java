@@ -2,7 +2,13 @@ package com.demo.nearbyfiletransfer;
 
 import androidx.annotation.NonNull;
 
-public class ExecuterModel implements Comparable<ExecuterModel>  {
+import java.util.Comparator;
+import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
+
+public class ExecuterModel implements Comparable<ExecuterModel> {
 
     private String codename;
     private String rating;
@@ -125,6 +131,48 @@ public class ExecuterModel implements Comparable<ExecuterModel>  {
 
     @Override
     public int compareTo(ExecuterModel executerModel) {
-        return (int)(this.getUtility() - executerModel.getUtility());
+        return Double.compare(this.getUtility(),executerModel.getUtility());
+    }
+    private class CompareByUtility implements Comparator<ExecuterModel>{
+
+        @Override
+        public int compare(ExecuterModel executerModel, ExecuterModel t1) {
+            return Double.compare(executerModel.getUtility(),t1.getUtility());
+        }
+
+        @Override
+        public Comparator<ExecuterModel> reversed() {
+            return null;
+        }
+
+        @Override
+        public Comparator<ExecuterModel> thenComparing(Comparator<? super ExecuterModel> other) {
+            return null;
+        }
+
+        @Override
+        public <U> Comparator<ExecuterModel> thenComparing(Function<? super ExecuterModel, ? extends U> keyExtractor, Comparator<? super U> keyComparator) {
+            return null;
+        }
+
+        @Override
+        public <U extends Comparable<? super U>> Comparator<ExecuterModel> thenComparing(Function<? super ExecuterModel, ? extends U> keyExtractor) {
+            return null;
+        }
+
+        @Override
+        public Comparator<ExecuterModel> thenComparingInt(ToIntFunction<? super ExecuterModel> keyExtractor) {
+            return null;
+        }
+
+        @Override
+        public Comparator<ExecuterModel> thenComparingLong(ToLongFunction<? super ExecuterModel> keyExtractor) {
+            return null;
+        }
+
+        @Override
+        public Comparator<ExecuterModel> thenComparingDouble(ToDoubleFunction<? super ExecuterModel> keyExtractor) {
+            return null;
+        }
     }
 }

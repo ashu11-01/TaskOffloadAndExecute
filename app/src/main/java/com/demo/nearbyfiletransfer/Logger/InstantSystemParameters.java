@@ -7,8 +7,6 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Environment;
 import android.os.StatFs;
-import android.util.Log;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -98,8 +96,6 @@ public class InstantSystemParameters {
         parameterMap.put("RAM",getCurrentRamUsage());   //current ram usage
         parameterMap.put("CPUFrequency",getCurrentCPUFreqMHz()); //current CPU Frequency MHz
         parameterMap.put("Storage",getStorageInfo());  //availabel storage in KB
-        Toast.makeText(context,parameterMap.toString(),Toast.LENGTH_LONG).show();
-        Log.d("parameter",parameterMap.toString());
         return parameterMap;
     }
 }

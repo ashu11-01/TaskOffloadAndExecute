@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Nearby File Transfer</string>
+    <string name="app_name">Nearby-Offload</string>
     <string name="role_executer">Executer</string>
     <string name="role_offloader">Offloader</string>
     <string name="choose_role">Choose Your Role</string>
@@ -29,7 +29,7 @@
     <string name="code_file">Choose code file: </string>
     <string name="browse">Browse</string>
     <string name="list_executers">List of Nearby Executers</string>
-    <string name="slider_inst">Set your preferences \n (Each weight value must be a float and sum of weight must sum to 1)</string>
+    <string name="slider_inst">Set your preferences \n(Each weight must be a decimal value between 0 and 1.Also sum of weights must be 1)</string>
     <string name="system_param_pref">System Parameter</string>
     <string name="broker_rating_pref">Broker Rating</string>
     <string name="percent">%</string>
@@ -37,4 +37,18 @@
     <string name="storage_unit">KB</string>
     <string name="input_file_name">Input Filename</string>
     <string name="code_file_name">Code Filename</string>
+    <string name="discovery_count_down">Discovery stops in: </string>
+    <string-array name="count_minutes">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>120</item>
+        <item>180</item>
+    </string-array>
+    <string-array name="selection_methods">
+        <item>MAAU</item>
+        <item>TOPSIS</item>
+    </string-array>
+    <string name="discovery_stops_in">Discovery stops in</string>
+    <string name="seconds">sec</string>
 </resources>

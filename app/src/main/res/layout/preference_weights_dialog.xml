@@ -9,6 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:gravity="center"
         android:text="@string/slider_inst"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -50,22 +51,97 @@
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout4"
         app:srcCompat="@drawable/storage" />
 
+    <ImageView
+        android:id="@+id/imageView8"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="@+id/imageView7"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
+        app:srcCompat="@drawable/ic_timer_24dp" />
+
+    <TextView
+        android:id="@+id/textView8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Selection Method"
+        android:textColor="#000000"
+        android:textSize="15.5sp"
+        app:layout_constraintStart_toStartOf="@+id/imageView8"
+        app:layout_constraintTop_toBottomOf="@+id/imageView8" />
+
+    <Spinner
+        android:id="@+id/sp_selection_method"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="12dp"
+        android:entries="@array/selection_methods"
+        app:layout_constraintEnd_toEndOf="@+id/textView5"
+        app:layout_constraintStart_toEndOf="@+id/textView8"
+        app:layout_constraintTop_toBottomOf="@+id/sp_countdown" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/discovery_stops_in"
+        android:textColor="#000000"
+        android:textSize="15.5sp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView8"
+        app:layout_constraintStart_toStartOf="@+id/textInputLayout"
+        app:layout_constraintTop_toTopOf="@+id/imageView8" />
+
+    <Button
+        android:id="@+id/btn_reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Reset"
+        app:layout_constraintStart_toStartOf="@+id/imageView8"
+        app:layout_constraintTop_toBottomOf="@+id/sp_selection_method" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:text="@string/seconds"
+        android:textColor="#000000"
+        android:textSize="14.5sp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView8"
+        app:layout_constraintStart_toEndOf="@+id/sp_countdown"
+        app:layout_constraintTop_toTopOf="@+id/imageView8" />
+
     <Button
         android:id="@+id/btn_wtSubmit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
-        android:text="Set Weights"
+        android:backgroundTint="@color/colorAccent"
+        android:text="@string/start_discovery"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+        app:layout_constraintTop_toTopOf="@+id/btn_reset" />
+
+    <Spinner
+        android:id="@+id/sp_countdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:entries="@array/count_minutes"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView8"
+        app:layout_constraintStart_toEndOf="@+id/textView4"
+        app:layout_constraintTop_toTopOf="@+id/imageView8" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
+        android:textColorHint="#000000"
+        app:hintTextColor="#000000"
         app:layout_constraintStart_toStartOf="@+id/textInputLayout4"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout4">
 
@@ -74,13 +150,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Storage Weight"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:textSize="18sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout4"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
+        android:textColorHint="#000000"
+        app:hintTextColor="#000000"
         app:layout_constraintStart_toStartOf="@+id/textInputLayout3"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout3">
 
@@ -89,13 +168,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="CPU Freq Weight"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:textSize="18sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout3"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
+        android:textColorHint="#000000"
+        app:hintTextColor="#000000"
         app:layout_constraintStart_toStartOf="@+id/textInputLayout2"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout2">
 
@@ -104,7 +186,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="RAM Usage Weight"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:textSize="18sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -112,6 +195,8 @@
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
+        android:textColorHint="#000000"
+        app:hintTextColor="#000000"
         app:layout_constraintStart_toEndOf="@+id/imageView6"
         app:layout_constraintTop_toTopOf="@+id/imageView6">
 
@@ -120,7 +205,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Battery Weight"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:textSize="18sp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
