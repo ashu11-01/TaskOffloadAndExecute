@@ -1,5 +1,6 @@
 # Task Offload And Execute
-Task offloading and execution among android phones
+Task offloading and execution among android phones.
+This android app is the basis of our published research paper titled ["NearBy-Offload: An Android based Application for Computation Offloading"](https://ieeexplore.ieee.org/document/9342724)
 
 ## Sample Run 
 Offloader             |  Executer
